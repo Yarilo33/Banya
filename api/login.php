@@ -41,6 +41,7 @@ try {
     $_SESSION['phone'] = $user['phone'];
     $_SESSION['role'] = $user['role'];
 
+
     echo json_encode([
         'success' => true,
         'message' => 'Вход выполнен успешно',
