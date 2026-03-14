@@ -41,10 +41,6 @@ try {
     $_SESSION['phone'] = $user['phone'];
     $_SESSION['role'] = $user['role'];
 
-    // Обновляем время входа
-    $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE user_id = ?");
-    $stmt->execute([$user['user_id']]);
-
     echo json_encode([
         'success' => true,
         'message' => 'Вход выполнен успешно',
