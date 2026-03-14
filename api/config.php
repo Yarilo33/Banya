@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $host = 'localhost';
 $dbname = 'banya_booking';
-$username = 'root';      // замените на вашего пользователя
+$username = 'root';      // замените на вашего пользователя(пока не меняем, чтобы были все права)
 $password = '';          // замените на ваш пароль
 
 try {
