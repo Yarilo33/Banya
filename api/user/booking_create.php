@@ -8,12 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Проверка авторизации
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Требуется авторизация']);
-    exit;
-}
+// Проверка авторизации через JWT
+$currentUser = requireAuth();
+$userId = $currentUser['user_id'];
 
 // Получаем данные
 $input = json_decode(file_get_contents('php://input'), true);
@@ -147,7 +144,7 @@ try {
     ");
     
     $stmt->execute([
-        $_SESSION['user_id'],
+        $userId,
         $hallId,
         $date,
         $startTime . ':00',

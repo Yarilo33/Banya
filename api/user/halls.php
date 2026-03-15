@@ -8,12 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// Проверка авторизации
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Требуется авторизация']);
-    exit;
-}
+// Проверка авторизации через JWT
+$currentUser = requireAuth();
 
 // Получаем параметры фильтрации
 $typeIds = $_GET['types'] ?? '';

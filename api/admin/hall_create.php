@@ -9,12 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Проверка авторизации админа, пользователь не имеет доступ
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Доступ запрещен. Требуется авторизация администратора']);
-    exit;
-}
+// Проверка авторизации админа через JWT
+$currentUser = requireAdmin();
 
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 

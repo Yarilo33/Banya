@@ -61,10 +61,12 @@ try {
     
     $userId = (int)$pdo->lastInsertId();
 
-    // Автоматически входим после регистрации
-    $_SESSION['user_id'] = $userId;
-    $_SESSION['phone'] = $phone;
-    $_SESSION['role'] = $role;
+    // Генерируем JWT токен для автоматического входа
+    $tokenPayload = [
+        'user_id' => $userId,
+        'phone' => $phone,
+        'role' => $role
+    ];
 
     echo json_encode([
         'success' => true,

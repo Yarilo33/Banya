@@ -36,10 +36,14 @@ try {
         exit;
     }
 
-    // Записываем в сессию
-    $_SESSION['user_id'] = (int)$user['user_id'];
-    $_SESSION['phone'] = $user['phone'];
-    $_SESSION['role'] = $user['role'];
+    // Генерируем JWT токен
+    $tokenPayload = [
+        'user_id' => (int)$user['user_id'],
+        'phone' => $user['phone'],
+        'role' => $user['role']
+    ];
+
+    $token = generateJWT($tokenPayload);
 
 
     echo json_encode([

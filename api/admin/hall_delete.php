@@ -9,12 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
     exit;
 }
 
-// Админчик
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Доступ запрещен']);
-    exit;
-}
+// Проверка авторизации админа через JWT
+$currentUser = requireAdmin();
 
 // Получаем ID зала
 $hallId = (int)($_GET['id'] ?? 0);

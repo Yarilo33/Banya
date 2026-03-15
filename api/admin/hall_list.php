@@ -9,12 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// Проверка авторизации админа
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Доступ запрещен']);
-    exit;
-}
+// Проверка авторизации админа через JWT
+$currentUser = requireAdmin();
 
 try {
     // Получаем все залы с полной информацией
