@@ -29,13 +29,14 @@ public class AuthActivity extends AppCompatActivity {
     private static final String PREF_NAME = "auth_prefs";
     private static final String KEY_TOKEN = "jwt_token";
     private static final String KEY_USER = "user_data";
+    private static final String KEY_ROLE = "user_role";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
 
-        // Привязываем view по ID из layout
+
         etPhone = findViewById(R.id.et_phone);
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
@@ -43,12 +44,15 @@ public class AuthActivity extends AppCompatActivity {
         tvBack = findViewById(R.id.tv_back);
         progressBar = findViewById(R.id.progress_bar);
 
+        // Кнопка "Назад"
         tvBack.setOnClickListener(v -> finish());
+
 
         btnRegister.setOnClickListener(v ->
                 Toast.makeText(this, "Регистрация пока недоступна", Toast.LENGTH_SHORT).show()
         );
 
+        // Кнопка "Авторизоваться"
         btnLogin.setOnClickListener(v -> {
             String phone = etPhone.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
@@ -62,10 +66,12 @@ public class AuthActivity extends AppCompatActivity {
         });
     }
 
+
     private void login(final String phone, final String password) {
         progressBar.setVisibility(View.VISIBLE);
         btnLogin.setEnabled(false);
 
+        // Сетевой запрос в отдельном потоке
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -122,13 +128,16 @@ public class AuthActivity extends AppCompatActivity {
 
                                 if (success) {
                                     String token = jsonResult.getString("token");
-                                    String userData = jsonResult.getJSONObject("user").toString();
+                                    JSONObject user = jsonResult.getJSONObject("user");
+                                    String userData = user.toString();
+                                    String userRole = user.optString("role", "");
 
-                                    // Сохранение токена
+                                    // Сохраняем данные в SharedPreferences
                                     SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
                                     prefs.edit()
                                             .putString(KEY_TOKEN, token)
                                             .putString(KEY_USER, userData)
+                                            .putString(KEY_ROLE, userRole)
                                             .apply();
 
                                     Toast.makeText(AuthActivity.this, "Вход выполнен успешно", Toast.LENGTH_SHORT).show();
