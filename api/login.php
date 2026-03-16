@@ -49,6 +49,8 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Вход выполнен успешно',
+        'token' => $token,
+        'expires_in' => JWT_EXPIRE_HOURS * 3600,
         'user' => [
             'id' => (int)$user['user_id'],
             'phone' => $user['phone'],
