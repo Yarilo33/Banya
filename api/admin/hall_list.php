@@ -22,7 +22,6 @@ try {
             h.price_hourly,
             h.capacity,
             h.is_active,
-            h.created_at,
             GROUP_CONCAT(DISTINCT bt.type_id) as type_ids,
             GROUP_CONCAT(DISTINCT bt.display_name ORDER BY bt.type_id SEPARATOR ', ') as type_names,
             GROUP_CONCAT(DISTINCT hp.photo_id, ':', hp.photo_url SEPARATOR '|') as photos,
