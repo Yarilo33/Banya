@@ -43,8 +43,6 @@ public class AuthActivity extends AppCompatActivity {
         btnRegister = findViewById(R.id.btn_register);
         tvBack = findViewById(R.id.tv_back);
         progressBar = findViewById(R.id.progress_bar);
-
-        // Кнопка "Назад"
         tvBack.setOnClickListener(v -> finish());
 
 

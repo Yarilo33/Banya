@@ -28,9 +28,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
     }
 
-    /**
-     * Инициализация меню (вызывать из onCreate после setContentView)
-     */
+
     protected void initMenu() {
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.navigationView);
@@ -48,6 +46,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         // Обработчик пунктов меню
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
+            if (id == R.id.nav_main) {
+                startActivity(new Intent(this, MainActivity.class));
+                drawerLayout.closeDrawer(GravityCompat.END);
+                return true;
+            }
+
 
             if (id == R.id.nav_login) {
                 handleLoginClick();
@@ -69,7 +73,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             return true;
         });
 
-        // Обработка кнопки "Назад"
+
         getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -89,9 +93,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         updateMenuVisibility();
     }
 
-    /**
-     * Обновляет видимость пунктов меню
-     */
+
     private void updateMenuVisibility() {
         if (navigationView == null) return;
 
@@ -108,9 +110,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Обработка клика на "Войти/Выйти"
-     */
+
     private void handleLoginClick() {
         if (isAuthenticated()) {
             showLogoutDialog();
@@ -119,18 +119,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Проверка авторизации
-     */
+
     protected boolean isAuthenticated() {
         SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         String token = prefs.getString(KEY_TOKEN, null);
         return token != null && !token.isEmpty();
     }
 
-    /**
-     * Проверка на админа
-     */
+
     protected boolean isAdmin() {
         SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         String role = prefs.getString("user_role", "");

@@ -65,7 +65,7 @@
             android:layout_marginStart="8dp"
             android:text="Регистрация"
             app:cornerRadius="8dp"
-            app:backgroundTint="#F0F0F0"
+            app:backgroundTint="#F8F8F8"
             android:textColor="#1E1E1E"/>
     </LinearLayout>
 
