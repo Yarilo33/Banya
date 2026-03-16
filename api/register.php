@@ -68,6 +68,8 @@ try {
         'role' => $role
     ];
 
+    $token = generateJWT($tokenPayload);
+
     echo json_encode([
         'success' => true,
         'message' => 'Регистрация успешна',
