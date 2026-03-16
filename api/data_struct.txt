@@ -5,6 +5,7 @@ api/
 ├── logout.php          Выход
 ├── register.php        Регистрация
 ├── create_db.php       Скрипт для пересоздания бд
+├── refresh_token.php   Обновление токена
 ├── admin/
 │   ├── halls_create.php   # Создание зала
 │   ├── halls_update.php   # Редактирование зала
