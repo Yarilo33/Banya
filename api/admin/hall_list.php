@@ -37,7 +37,6 @@ try {
         LEFT JOIN bath_types bt ON hbt.type_id = bt.type_id
         LEFT JOIN hall_photos hp ON h.hall_id = hp.hall_id
         GROUP BY h.hall_id
-        ORDER BY h.created_at DESC
     ");
     
     $halls = $stmt->fetchAll();
@@ -60,7 +59,6 @@ try {
             'price_hourly' => (float)$hall['price_hourly'],
             'capacity' => (int)$hall['capacity'],
             'is_active' => (bool)$hall['is_active'],
-            'created_at' => $hall['created_at'],
             'bath_types' => $hall['type_ids'] ? array_map('intval', explode(',', $hall['type_ids'])) : [],
             'bath_type_names' => $hall['type_names'] ? explode(', ', $hall['type_names']) : [],
             'photos' => $photosList,
