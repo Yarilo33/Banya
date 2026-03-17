@@ -126,31 +126,51 @@ try {
         }
     }
 
-    // Добавляем новые фото (если есть потому что пока могут и не быть)
+    // Добавляем новые фото
     $newPhotos = [];
-    if (!empty($_FILES['photos'])) {
+
+    if (isset($_FILES['photos']) && !empty($_FILES['photos']['name'])) {
+
+        $isMultiple = is_array($_FILES['photos']['name']);
+
+        if ($isMultiple) {
+            $fileCount = count($_FILES['photos']['name']);
+        } else {
+            $_FILES['photos'] = [
+                'name' => [$_FILES['photos']['name']],
+                'type' => [$_FILES['photos']['type']],
+                'tmp_name' => [$_FILES['photos']['tmp_name']],
+                'error' => [$_FILES['photos']['error']],
+                'size' => [$_FILES['photos']['size']]
+            ];
+            $fileCount = 1;
+        }
+
         $uploadDir = '../uploads/halls/' . $hallId . '/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
-        $files = $_FILES['photos'];
-        $fileCount = is_array($files['name']) ? count($files['name']) : 1;
-
         for ($i = 0; $i < $fileCount; $i++) {
-            $fileName = is_array($files['name']) ? $files['name'][$i] : $files['name'];
-            $tmpName = is_array($files['tmp_name']) ? $files['tmp_name'][$i] : $files['tmp_name'];
-            $error = is_array($files['error']) ? $files['error'][$i] : $files['error'];
+            $fileName = $_FILES['photos']['name'][$i];
+            $tmpName = $_FILES['photos']['tmp_name'][$i];
+            $error = $_FILES['photos']['error'][$i];
 
             if ($error === UPLOAD_ERR_OK) {
-                $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+                $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+                if (!in_array($ext, $allowed)) {
+                    continue;
+                }
+
                 $newName = uniqid() . '.' . $ext;
                 $destination = $uploadDir . $newName;
 
                 if (move_uploaded_file($tmpName, $destination)) {
                     $photoUrl = '/uploads/halls/' . $hallId . '/' . $newName;
                     $newPhotos[] = $photoUrl;
-                    
+
                     $stmt = $pdo->prepare("INSERT INTO hall_photos (hall_id, photo_url) VALUES (?, ?)");
                     $stmt->execute([$hallId, $photoUrl]);
                 }
