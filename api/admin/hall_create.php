@@ -2,28 +2,24 @@
 declare(strict_types=1);
 require_once '../config.php';
 
-// Только POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Метод не поддерживается']);
     exit;
 }
 
-// Проверка авторизации админа через JWT
 $currentUser = requireAdmin();
 
 $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 
 if (strpos($contentType, 'multipart/form-data') !== false) {
-    // Форма с файлами
     $name = trim($_POST['name'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $price_hourly = (float)($_POST['price_hourly'] ?? 0);
     $capacity = (int)($_POST['capacity'] ?? 4);
-    $bath_types = $_POST['bath_types'] ?? '[]'; // JSON массив 
+    $bath_types = $_POST['bath_types'] ?? '[]';
     $bath_types = json_decode($bath_types, true) ?: [];
 } else {
-    // JSON
     $input = json_decode(file_get_contents('php://input'), true);
     $name = trim($input['name'] ?? '');
     $description = trim($input['description'] ?? '');
@@ -53,13 +49,12 @@ if (empty($bath_types) || !is_array($bath_types)) {
     $errors[] = 'Выберите хотя бы один тип бани';
 }
 
-// Проверяем, что типы бань существуют
 if (!empty($bath_types)) {
     $placeholders = implode(',', array_fill(0, count($bath_types), '?'));
     $stmt = $pdo->prepare("SELECT type_id FROM bath_types WHERE type_id IN ($placeholders)");
     $stmt->execute($bath_types);
     $validTypes = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    
+
     if (count($validTypes) !== count($bath_types)) {
         $errors[] = 'Указаны несуществующие типы бань';
     }
@@ -76,35 +71,51 @@ try {
 
     // Создание зала
     $stmt = $pdo->prepare("
-        INSERT INTO bath_halls (name, description, price_hourly, capacity, is_active) 
+        INSERT INTO bath_halls (name, description, price_hourly, capacity, is_active)
         VALUES (?, ?, ?, ?, TRUE)
     ");
     $stmt->execute([$name, $description, $price_hourly, $capacity]);
     $hallId = (int)$pdo->lastInsertId();
 
-    // Добавляем типы
+    // Добавляем типы бань
     $stmt = $pdo->prepare("INSERT INTO hall_bath_types (hall_id, type_id) VALUES (?, ?)");
     foreach ($bath_types as $typeId) {
         $stmt->execute([$hallId, (int)$typeId]);
     }
 
-    // Создаем шаблоны расписания (по умолчанию 07:00-23:00 каждый день, потом редактируем)
-    $stmt = $pdo->prepare("
-        INSERT INTO hall_schedule_templates (hall_id, day_of_week, open_time, close_time, is_working) 
-        VALUES (?, ?, '07:00:00', '23:00:00', TRUE)
+    // Создание расписания на все дни недели
+    $scheduleCreated = [];
+    $scheduleStmt = $pdo->prepare("
+        INSERT INTO hall_schedule_templates
+        (hall_id, day_of_week, open_time, close_time, is_working)
+        VALUES (?, ?, '07:00:00', '23:00:00', 1)
     ");
+
     for ($day = 0; $day <= 6; $day++) {
-        $stmt->execute([$hallId, $day]);
+        try {
+            $scheduleStmt->execute([$hallId, $day]);
+            $scheduleCreated[] = [
+                'day_of_week' => $day,
+                'open_time' => '07:00',
+                'close_time' => '23:00',
+                'is_working' => true
+            ];
+        } catch (PDOException $e) {
+            // Если запись уже существует (дубликат), пропускаем
+            if ($e->getCode() == 23000) {
+                continue;
+            }
+            throw $e;
+        }
     }
 
-    // Обрабатываем загруженные фото
+    // Обработка фото
     $photos = [];
+
     if (isset($_FILES['photos']) && !empty($_FILES['photos']['name'])) {
 
-        // Определяем, фото одно или несколько
         $isMultiple = is_array($_FILES['photos']['name']);
 
-        // Нормализуем в единый массив
         if ($isMultiple) {
             $fileCount = count($_FILES['photos']['name']);
         } else {
@@ -122,18 +133,18 @@ try {
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
+
         for ($i = 0; $i < $fileCount; $i++) {
             $fileName = $_FILES['photos']['name'][$i];
             $tmpName = $_FILES['photos']['tmp_name'][$i];
             $error = $_FILES['photos']['error'][$i];
 
             if ($error === UPLOAD_ERR_OK) {
-                // Проверяем расширение
                 $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
                 $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
                 if (!in_array($ext, $allowed)) {
-                    continue; // Пропускаем неподдерживаемые форматы
+                    continue;
                 }
 
                 $newName = uniqid() . '.' . $ext;
@@ -176,7 +187,12 @@ try {
             'is_active' => (bool)$hall['is_active'],
             'bath_types' => $hall['type_ids'] ? array_map('intval', explode(',', $hall['type_ids'])) : [],
             'bath_type_names' => $hall['type_names'] ? explode(',', $hall['type_names']) : [],
-            'photos' => $photos
+            'photos' => $photos,
+            'photos_count' => count($photos)
+        ],
+        'schedule' => [
+            'created_days' => count($scheduleCreated),
+            'days' => $scheduleCreated
         ]
     ]);
 
