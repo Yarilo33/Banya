@@ -1,5 +1,4 @@
 package com.example.saunapril;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,19 +9,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -35,8 +30,9 @@ public class HallsActivity extends BaseActivity {
 
     private LinearLayout hallsContainer;
     private int currentHallIdForUpload = 0;
+    private int currentCapacityForUpload = 0;
+    private JSONArray currentBathTypesForUpload = null;
 
-    // Фиксированные типы бань из БД
     private static final int[] BATH_TYPE_IDS = {1, 2, 3, 4};
     private static final String[] BATH_TYPE_NAMES = {"Хамам", "Русская", "Сибирская", "Турецкая"};
 
@@ -62,7 +58,7 @@ public class HallsActivity extends BaseActivity {
         if (requestCode == REQUEST_IMAGE_PICK && resultCode == RESULT_OK && data != null) {
             Uri photoUri = data.getData();
             if (photoUri != null) {
-                uploadPhoto(currentHallIdForUpload, photoUri);
+                uploadPhoto(currentHallIdForUpload, photoUri, currentCapacityForUpload, currentBathTypesForUpload);
             }
         }
     }
@@ -231,6 +227,8 @@ public class HallsActivity extends BaseActivity {
         btnAddPhoto.setLayoutParams(addBtnParams);
         btnAddPhoto.setOnClickListener(v -> {
             currentHallIdForUpload = hallId;
+            currentCapacityForUpload = capacity;
+            currentBathTypesForUpload = bathTypes;
             pickImage();
         });
         photosRow.addView(btnAddPhoto);
@@ -273,7 +271,7 @@ public class HallsActivity extends BaseActivity {
                                 .setTitle("Удалить фотографию")
                                 .setMessage("Вы уверены?")
                                 .setPositiveButton("Удалить", (dialog, which) -> {
-                                    deletePhoto(hallId, photoId, photoContainer);
+                                    deletePhoto(hallId, photoId, photoContainer, capacity, bathTypes);
                                 })
                                 .setNegativeButton("Отмена", null)
                                 .show();
@@ -353,7 +351,6 @@ public class HallsActivity extends BaseActivity {
         startActivityForResult(intent, REQUEST_IMAGE_PICK);
     }
 
-    // Диалог редактирования с чекбоксами типов бань
     private void showEditDialog(int hallId, String name, String description, int price, int capacity, JSONArray originalBathTypes) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Редактирование зала");
@@ -384,7 +381,6 @@ public class HallsActivity extends BaseActivity {
         etCapacity.setText(String.valueOf(capacity));
         layout.addView(etCapacity);
 
-        // Чекбоксы для типов бань
         TextView tvBathTypes = new TextView(this);
         tvBathTypes.setText("Типы бань:");
         tvBathTypes.setTextSize(14);
@@ -395,10 +391,8 @@ public class HallsActivity extends BaseActivity {
         LinearLayout bathTypesLayout = new LinearLayout(this);
         bathTypesLayout.setOrientation(LinearLayout.VERTICAL);
 
-        // Массив для хранения состояния чекбоксов
         final boolean[] selectedTypes = new boolean[BATH_TYPE_IDS.length];
 
-        // Отмечаем текущие выбранные типы
         if (originalBathTypes != null) {
             for (int i = 0; i < originalBathTypes.length(); i++) {
                 int typeId = originalBathTypes.optInt(i, -1);
@@ -411,7 +405,6 @@ public class HallsActivity extends BaseActivity {
             }
         }
 
-        // Создаем чекбоксы
         for (int i = 0; i < BATH_TYPE_NAMES.length; i++) {
             final int index = i;
             CheckBox checkBox = new CheckBox(this);
@@ -438,7 +431,6 @@ public class HallsActivity extends BaseActivity {
                 return;
             }
 
-            // Проверяем, выбран ли хотя бы один тип бани
             boolean hasSelected = false;
             for (boolean selected : selectedTypes) {
                 if (selected) {
@@ -452,7 +444,6 @@ public class HallsActivity extends BaseActivity {
                 return;
             }
 
-            // Создаем массив выбранных ID типов бань
             JSONArray selectedBathTypes = new JSONArray();
             for (int i = 0; i < selectedTypes.length; i++) {
                 if (selectedTypes[i]) {
@@ -598,7 +589,8 @@ public class HallsActivity extends BaseActivity {
         }).start();
     }
 
-    private void deletePhoto(int hallId, int photoId, LinearLayout photoContainer) {
+    // Удаление фото с передачей capacity и bathTypes
+    private void deletePhoto(int hallId, int photoId, LinearLayout photoContainer, int currentCapacity, JSONArray currentBathTypes) {
         new Thread(() -> {
             try {
                 String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
@@ -616,11 +608,13 @@ public class HallsActivity extends BaseActivity {
                 conn.setDoOutput(true);
 
                 JSONObject json = new JSONObject();
-                json.put("name", "placeholder");
-                json.put("bath_types", new JSONArray().put(1));
+                // Отправляем текущие данные, чтобы сервер не сбрасывал их
+                json.put("capacity", currentCapacity);
+                json.put("bath_types", currentBathTypes != null && currentBathTypes.length() > 0 ? currentBathTypes : new JSONArray().put(1));
                 json.put("photos_to_delete", new JSONArray().put(photoId));
 
                 String jsonInputString = json.toString();
+                Log.d(TAG, "Delete photo request: " + jsonInputString);
 
                 OutputStream os = conn.getOutputStream();
                 byte[] input = jsonInputString.getBytes("UTF-8");
@@ -669,7 +663,8 @@ public class HallsActivity extends BaseActivity {
         }).start();
     }
 
-    private void uploadPhoto(int hallId, Uri photoUri) {
+    // Загрузка фото с передачей capacity и bathTypes
+    private void uploadPhoto(int hallId, Uri photoUri, int currentCapacity, JSONArray currentBathTypes) {
         new Thread(() -> {
             try {
                 String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
@@ -688,9 +683,9 @@ public class HallsActivity extends BaseActivity {
                 conn.setReadTimeout(15000);
 
                 DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
-
-                writeField(dos, boundary, "name", "placeholder");
-                writeField(dos, boundary, "bath_types", "[1]");
+                writeField(dos, boundary, "capacity", String.valueOf(currentCapacity));
+                writeField(dos, boundary, "bath_types", currentBathTypes != null && currentBathTypes.length() > 0
+                        ? currentBathTypes.toString() : "[1,2]");
 
                 String fileName = "photo_" + System.currentTimeMillis() + ".jpg";
                 dos.writeBytes("--" + boundary + "\r\n");
