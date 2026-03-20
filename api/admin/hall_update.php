@@ -20,11 +20,11 @@ if ($hallId <= 0) {
 }
 
 // Получаем данные
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data') !== false) {
     // multipart/form-data
     $name = trim($_POST['name'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $price_hourly = $_POST['price_hourly'] !== '' ? (float)$_POST['price_hourly'] : null;
+    $price_hourly = $_POST['price_hourly'] ?? null;
     $capacity = $_POST['capacity'] !== '' ? (int)$_POST['capacity'] : null;
     $is_active = isset($_POST['is_active']) ? filter_var($_POST['is_active'], FILTER_VALIDATE_BOOLEAN) : null;
     $bath_types = $_POST['bath_types'] ?? '[]';
