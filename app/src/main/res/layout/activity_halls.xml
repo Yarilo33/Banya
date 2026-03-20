@@ -41,7 +41,6 @@
                 app:tint="#1E1E1E" />
         </LinearLayout>
 
-        <!-- Контейнер для карточек залов -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
