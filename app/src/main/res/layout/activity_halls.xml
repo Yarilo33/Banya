@@ -12,7 +12,6 @@
         android:orientation="vertical"
         android:background="@drawable/gradient_background">
 
-        <!-- Header -->
         <LinearLayout
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"
@@ -45,7 +44,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:contentDescription="Список залов">
 
             <LinearLayout
                 android:id="@+id/hallsContainer"
@@ -53,10 +53,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
         </ScrollView>
-
     </LinearLayout>
 
-    <!-- Меню -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="280dp"
@@ -66,5 +64,4 @@
         app:menu="@menu/menu_main"
         app:itemTextColor="#FFFFFF"
         app:itemIconTint="#1E1E1E" />
-
 </androidx.drawerlayout.widget.DrawerLayout>
