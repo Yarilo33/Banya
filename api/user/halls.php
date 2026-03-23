@@ -8,6 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
+
 // Доступ без авторизации
 $currentUser = getCurrentUser();
 
