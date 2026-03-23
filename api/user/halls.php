@@ -8,8 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// Проверка авторизации через JWT
-$currentUser = requireAuth();
+// Доступ без авторизации
+$currentUser = getCurrentUser();
 
 // Получаем параметры фильтрации
 $typeIds = $_GET['types'] ?? '';

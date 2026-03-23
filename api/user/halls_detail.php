@@ -8,8 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// Проверка авторизации через JWT
-$currentUser = requireAuth();
+// Доступ без авторизации
+$currentUser = getCurrentUser();
 
 // Получаем ID зала
 $hallId = (int)($_GET['id'] ?? 0);
