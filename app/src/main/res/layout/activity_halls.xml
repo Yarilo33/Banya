@@ -12,6 +12,7 @@
         android:orientation="vertical"
         android:background="@drawable/gradient_background">
 
+        <!-- Header -->
         <LinearLayout
             android:id="@+id/headerLayout"
             android:layout_width="match_parent"
@@ -40,11 +41,43 @@
                 app:tint="#1E1E1E" />
         </LinearLayout>
 
+        <!-- Счетчик залов и кнопка создания -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvHallsCount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Существующие залы"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#1E1E1E"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddHall"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="+ Добавить зал"
+                app:backgroundTint="#F8A242"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_orange"
+                />
+        </LinearLayout>
+
+        <!-- Список залов -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true"
-            android:padding="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp"
             android:contentDescription="Список залов">
 
             <LinearLayout
@@ -55,6 +88,7 @@
         </ScrollView>
     </LinearLayout>
 
+    <!-- Меню -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="280dp"

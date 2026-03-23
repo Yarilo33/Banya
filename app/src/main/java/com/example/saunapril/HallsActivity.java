@@ -1,23 +1,29 @@
 package com.example.saunapril;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -47,7 +53,13 @@ public class HallsActivity extends BaseActivity {
         setContentView(R.layout.activity_halls);
 
         initMenu();
+
         hallsContainer = findViewById(R.id.hallsContainer);
+
+
+        Button btnAddHall = findViewById(R.id.btnAddHall);
+        btnAddHall.setOnClickListener(v -> showCreateHallDialog());
+
         loadHalls();
     }
 
@@ -158,81 +170,66 @@ public class HallsActivity extends BaseActivity {
         JSONArray photos = hall.optJSONArray("photos");
         JSONArray bathTypes = hall.optJSONArray("bath_types");
 
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(16, 16, 16, 16);
-        card.setBackgroundResource(android.R.drawable.dialog_holo_light_frame);
+        // Надуваем XML-шаблон карточки
+        View card = LayoutInflater.from(this).inflate(R.layout.item_hall_card, hallsContainer, false);
 
-        TextView tvName = new TextView(this);
+        // Название
+        TextView tvName = card.findViewById(R.id.tvName);
         tvName.setText(name);
-        tvName.setTextSize(20);
-        tvName.setTypeface(null, android.graphics.Typeface.BOLD);
-        tvName.setPadding(0, 0, 0, 8);
-        card.addView(tvName);
 
+        // Особенности
+        TextView tvTypes = card.findViewById(R.id.tvTypes);
         if (bathTypeNames != null && bathTypeNames.length() > 0) {
             StringBuilder types = new StringBuilder();
             for (int i = 0; i < bathTypeNames.length(); i++) {
                 if (i > 0) types.append(", ");
                 types.append(bathTypeNames.optString(i, ""));
             }
-            TextView tvTypes = new TextView(this);
             tvTypes.setText("Особенности: " + types.toString());
-            tvTypes.setTextSize(14);
-            tvTypes.setPadding(0, 0, 0, 8);
-            tvTypes.setTextColor(0xFF666666);
-            card.addView(tvTypes);
+            tvTypes.setVisibility(View.VISIBLE);
         }
 
+        // Описание
+        TextView tvDescLabel = card.findViewById(R.id.tvDescLabel);
+        TextView tvDesc = card.findViewById(R.id.tvDesc);
         if (!description.isEmpty()) {
-            TextView tvDescLabel = new TextView(this);
-            tvDescLabel.setText("Описание:");
-            tvDescLabel.setTextSize(14);
-            tvDescLabel.setTypeface(null, android.graphics.Typeface.BOLD);
-            tvDescLabel.setPadding(0, 8, 0, 4);
-            card.addView(tvDescLabel);
-
-            TextView tvDesc = new TextView(this);
+            tvDescLabel.setVisibility(View.VISIBLE);
             tvDesc.setText(description);
-            tvDesc.setTextSize(14);
-            tvDesc.setPadding(0, 0, 0, 8);
-            card.addView(tvDesc);
+            tvDesc.setVisibility(View.VISIBLE);
         }
 
-        TextView tvInfo = new TextView(this);
+        // Цена и вместимость
+        TextView tvInfo = card.findViewById(R.id.tvInfo);
         tvInfo.setText("Цена: " + price + " руб./час | Вместимость: " + capacity + " чел.");
-        tvInfo.setTextSize(14);
-        tvInfo.setPadding(0, 0, 0, 16);
-        card.addView(tvInfo);
 
-        TextView tvPhotosLabel = new TextView(this);
-        tvPhotosLabel.setText("Фотографии зала:");
-        tvPhotosLabel.setTextSize(14);
-        tvPhotosLabel.setTypeface(null, android.graphics.Typeface.BOLD);
-        tvPhotosLabel.setPadding(0, 8, 0, 8);
-        card.addView(tvPhotosLabel);
+        // Фотографии
+        LinearLayout photosRow = card.findViewById(R.id.photosRow);
 
-        ScrollView photosScroll = new ScrollView(this);
-        photosScroll.setHorizontalScrollBarEnabled(true);
+        // Кнопка добавления фото
+        Button btnAddPhoto = new Button(this, null, android.R.attr.buttonStyle);
 
-        LinearLayout photosRow = new LinearLayout(this);
-        photosRow.setOrientation(LinearLayout.HORIZONTAL);
-        photosRow.setPadding(0, 0, 0, 16);
-
-        Button btnAddPhoto = new Button(this);
         btnAddPhoto.setText("+ Добавить фото");
         btnAddPhoto.setTextSize(12);
-        LinearLayout.LayoutParams addBtnParams = new LinearLayout.LayoutParams(200, 260);
+        btnAddPhoto.setTextColor(0xFFFFFFFF);
+
+//
+        btnAddPhoto.setBackgroundResource(R.drawable.button_orange);
+        btnAddPhoto.setBackgroundTintList(null);
+
+        LinearLayout.LayoutParams addBtnParams =
+                new LinearLayout.LayoutParams(200, 260);
         addBtnParams.setMargins(0, 0, 12, 0);
         btnAddPhoto.setLayoutParams(addBtnParams);
+
         btnAddPhoto.setOnClickListener(v -> {
             currentHallIdForUpload = hallId;
             currentCapacityForUpload = capacity;
             currentBathTypesForUpload = bathTypes;
             pickImage();
         });
-        photosRow.addView(btnAddPhoto);
 
+        photosRow.addView(btnAddPhoto);
+        // Существующие фото
         if (photos != null && photos.length() > 0) {
             for (int j = 0; j < photos.length(); j++) {
                 try {
@@ -287,48 +284,15 @@ public class HallsActivity extends BaseActivity {
             }
         }
 
-        photosScroll.addView(photosRow);
-        card.addView(photosScroll);
-
-        View divider = new View(this);
-        LinearLayout.LayoutParams dividerParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 2);
-        dividerParams.setMargins(0, 8, 0, 16);
-        divider.setLayoutParams(dividerParams);
-        divider.setBackgroundColor(0xFFCCCCCC);
-        card.addView(divider);
-
-        TextView tvActions = new TextView(this);
-        tvActions.setText("Действия:");
-        tvActions.setTextSize(14);
-        tvActions.setTypeface(null, android.graphics.Typeface.BOLD);
-        tvActions.setPadding(0, 0, 0, 8);
-        card.addView(tvActions);
-
-        LinearLayout buttonsLayout = new LinearLayout(this);
-        buttonsLayout.setOrientation(LinearLayout.HORIZONTAL);
-        buttonsLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-
-        Button btnEdit = new Button(this);
-        btnEdit.setText("Изменить");
-        btnEdit.setTextSize(12);
-        LinearLayout.LayoutParams editParams = new LinearLayout.LayoutParams(0, 40);
-        editParams.weight = 1;
-        editParams.setMargins(0, 0, 4, 0);
-        btnEdit.setLayoutParams(editParams);
-        btnEdit.setPadding(4, 4, 4, 4);
+        // Кнопки действий
+        Button btnEdit = card.findViewById(R.id.btnEdit);
+        btnEdit.setBackgroundTintList(null);
+        btnEdit.setTextColor(0xFFFFFFFF);
         btnEdit.setOnClickListener(v -> showEditDialog(hallId, name, description, price, capacity, bathTypes));
 
-        Button btnDelete = new Button(this);
-        btnDelete.setText("Удалить");
-        btnDelete.setTextSize(12);
-        LinearLayout.LayoutParams deleteParams = new LinearLayout.LayoutParams(0, 40);
-        deleteParams.weight = 1;
-        deleteParams.setMargins(4, 0, 0, 0);
-        btnDelete.setLayoutParams(deleteParams);
-        btnDelete.setPadding(4, 4, 4, 4);
+        Button btnDelete = card.findViewById(R.id.btnDelete);
+        btnDelete.setBackgroundTintList(null);
+        btnDelete.setTextColor(0xFF1E1E1E);
         btnDelete.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
                     .setTitle("Удалить зал")
@@ -338,10 +302,6 @@ public class HallsActivity extends BaseActivity {
                     .show();
         });
 
-        buttonsLayout.addView(btnEdit);
-        buttonsLayout.addView(btnDelete);
-        card.addView(buttonsLayout);
-
         hallsContainer.addView(card);
     }
 
@@ -349,6 +309,177 @@ public class HallsActivity extends BaseActivity {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, REQUEST_IMAGE_PICK);
+    }
+
+    // Диалог создания нового зала
+    private void showCreateHallDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Создание нового зала");
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(48, 24, 48, 24);
+
+        EditText etName = new EditText(this);
+        etName.setHint("Название зала *");
+        layout.addView(etName);
+
+        EditText etDescription = new EditText(this);
+        etDescription.setHint("Описание");
+        layout.addView(etDescription);
+
+        EditText etPrice = new EditText(this);
+        etPrice.setHint("Цена за час *");
+        etPrice.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        layout.addView(etPrice);
+
+        EditText etCapacity = new EditText(this);
+        etCapacity.setHint("Вместимость *");
+        etCapacity.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        layout.addView(etCapacity);
+
+        TextView tvBathTypes = new TextView(this);
+        tvBathTypes.setText("Типы бань: *");
+        tvBathTypes.setTextSize(14);
+        tvBathTypes.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvBathTypes.setPadding(0, 16, 0, 8);
+        layout.addView(tvBathTypes);
+
+        LinearLayout bathTypesLayout = new LinearLayout(this);
+        bathTypesLayout.setOrientation(LinearLayout.VERTICAL);
+
+        final boolean[] selectedTypes = new boolean[BATH_TYPE_IDS.length];
+
+        for (int i = 0; i < BATH_TYPE_NAMES.length; i++) {
+            final int index = i;
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(BATH_TYPE_NAMES[i]);
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                selectedTypes[index] = isChecked;
+            });
+            bathTypesLayout.addView(checkBox);
+        }
+
+        layout.addView(bathTypesLayout);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Создать", (dialog, which) -> {
+            String name = etName.getText().toString().trim();
+            String description = etDescription.getText().toString().trim();
+            String priceStr = etPrice.getText().toString().trim();
+            String capacityStr = etCapacity.getText().toString().trim();
+
+            if (name.isEmpty()) {
+                Toast.makeText(this, "Введите название зала", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (priceStr.isEmpty()) {
+                Toast.makeText(this, "Введите цену", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (capacityStr.isEmpty()) {
+                Toast.makeText(this, "Введите вместимость", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            boolean hasSelected = false;
+            for (boolean selected : selectedTypes) {
+                if (selected) {
+                    hasSelected = true;
+                    break;
+                }
+            }
+
+            if (!hasSelected) {
+                Toast.makeText(this, "Выберите хотя бы один тип бани", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            JSONArray selectedBathTypes = new JSONArray();
+            for (int i = 0; i < selectedTypes.length; i++) {
+                if (selectedTypes[i]) {
+                    selectedBathTypes.put(BATH_TYPE_IDS[i]);
+                }
+            }
+
+            createHall(name, description,
+                    Integer.parseInt(priceStr),
+                    Integer.parseInt(capacityStr),
+                    selectedBathTypes);
+        });
+
+        builder.setNegativeButton("Отмена", null);
+        builder.show();
+    }
+
+    // Создание зала
+    private void createHall(String name, String description, int price, int capacity, JSONArray bathTypes) {
+        new Thread(() -> {
+            try {
+                String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
+                        .getString("jwt_token", "");
+
+                String urlStr = BASE_URL + "/admin/hall_create.php";
+                URL url = new URL(urlStr);
+
+                String boundary = "----" + System.currentTimeMillis();
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+                conn.setRequestProperty("Accept-Charset", "UTF-8");
+                conn.setDoOutput(true);
+                conn.setConnectTimeout(15000);
+                conn.setReadTimeout(15000);
+
+                DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+
+                writeFieldUTF8(dos, boundary, "name", name);
+                writeFieldUTF8(dos, boundary, "description", description);
+                writeFieldUTF8(dos, boundary, "price_hourly", String.valueOf(price));
+                writeFieldUTF8(dos, boundary, "capacity", String.valueOf(capacity));
+                writeFieldUTF8(dos, boundary, "bath_types", bathTypes.toString());
+
+                dos.writeBytes("--" + boundary + "--\r\n");
+                dos.flush();
+                dos.close();
+
+                int responseCode = conn.getResponseCode();
+                BufferedReader reader = (responseCode >= 200 && responseCode < 300) ?
+                        new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8")) :
+                        new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
+
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) result.append(line);
+                reader.close();
+
+                String response = result.toString();
+
+                runOnUiThread(() -> {
+                    if (responseCode == 200) {
+                        Toast.makeText(this, "Зал создан", Toast.LENGTH_SHORT).show();
+                        loadHalls();
+                    } else {
+                        try {
+                            String clean = cleanJson(response);
+                            JSONObject err = new JSONObject(clean);
+                            String msg = err.optString("error", err.optString("message", "Ошибка " + responseCode));
+                            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            Toast.makeText(this, "Ошибка: " + response, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Ошибка: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            }
+        }).start();
     }
 
     private void showEditDialog(int hallId, String name, String description, int price, int capacity, JSONArray originalBathTypes) {
@@ -512,7 +643,6 @@ public class HallsActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     if (responseCode == 200) {
                         Toast.makeText(this, "Зал обновлен", Toast.LENGTH_SHORT).show();
-                        hallsContainer.removeAllViews();
                         loadHalls();
                     } else {
                         try {
@@ -566,7 +696,6 @@ public class HallsActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     if (finalCode == 200) {
                         Toast.makeText(this, "Зал удален", Toast.LENGTH_SHORT).show();
-                        hallsContainer.removeAllViews();
                         loadHalls();
                     } else {
                         try {
@@ -589,7 +718,6 @@ public class HallsActivity extends BaseActivity {
         }).start();
     }
 
-    // Удаление фото с передачей capacity и bathTypes
     private void deletePhoto(int hallId, int photoId, LinearLayout photoContainer, int currentCapacity, JSONArray currentBathTypes) {
         new Thread(() -> {
             try {
@@ -608,7 +736,6 @@ public class HallsActivity extends BaseActivity {
                 conn.setDoOutput(true);
 
                 JSONObject json = new JSONObject();
-                // Отправляем текущие данные, чтобы сервер не сбрасывал их
                 json.put("capacity", currentCapacity);
                 json.put("bath_types", currentBathTypes != null && currentBathTypes.length() > 0 ? currentBathTypes : new JSONArray().put(1));
                 json.put("photos_to_delete", new JSONArray().put(photoId));
@@ -663,7 +790,6 @@ public class HallsActivity extends BaseActivity {
         }).start();
     }
 
-    // Загрузка фото с передачей capacity и bathTypes
     private void uploadPhoto(int hallId, Uri photoUri, int currentCapacity, JSONArray currentBathTypes) {
         new Thread(() -> {
             try {
@@ -683,8 +809,9 @@ public class HallsActivity extends BaseActivity {
                 conn.setReadTimeout(15000);
 
                 DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
-                writeField(dos, boundary, "capacity", String.valueOf(currentCapacity));
-                writeField(dos, boundary, "bath_types", currentBathTypes != null && currentBathTypes.length() > 0
+
+                writeFieldUTF8(dos, boundary, "capacity", String.valueOf(currentCapacity));
+                writeFieldUTF8(dos, boundary, "bath_types", currentBathTypes != null && currentBathTypes.length() > 0
                         ? currentBathTypes.toString() : "[1,2]");
 
                 String fileName = "photo_" + System.currentTimeMillis() + ".jpg";
@@ -723,7 +850,6 @@ public class HallsActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     if (responseCode == 200) {
                         Toast.makeText(this, "Фото загружено", Toast.LENGTH_SHORT).show();
-                        hallsContainer.removeAllViews();
                         loadHalls();
                     } else {
                         try {
@@ -744,10 +870,21 @@ public class HallsActivity extends BaseActivity {
         }).start();
     }
 
-    private void writeField(DataOutputStream dos, String boundary, String name, String value) throws Exception {
-        dos.writeBytes("--" + boundary + "\r\n");
-        dos.writeBytes("Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n");
-        dos.writeBytes(value + "\r\n");
+
+
+    private void writeFieldUTF8(DataOutputStream dos, String boundary, String name, String value) throws Exception {
+        String lineFeed = "\r\n";
+
+        dos.write(("--" + boundary).getBytes("UTF-8"));
+        dos.write(lineFeed.getBytes("UTF-8"));
+
+        dos.write(("Content-Disposition: form-data; name=\"" + name + "\"").getBytes("UTF-8"));
+        dos.write(lineFeed.getBytes("UTF-8"));
+
+        dos.write(lineFeed.getBytes("UTF-8"));
+
+        dos.write(value.getBytes("UTF-8"));
+        dos.write(lineFeed.getBytes("UTF-8"));
     }
 
     private void loadImage(String url, ImageView imageView) {
