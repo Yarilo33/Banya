@@ -61,11 +61,15 @@
 
         <!-- Фильтры -->
         <HorizontalScrollView
+            android:background="#80E7D6D1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:scrollbars="none"
-            android:paddingStart="16dp"
+            android:paddingStart="24dp"
+            android:paddingTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:paddingBottom="24dp"
             android:paddingEnd="16dp">
 
             <LinearLayout
