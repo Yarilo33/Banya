@@ -9,23 +9,20 @@
     tools:context=".MainActivity">
 
     <!-- Основной контент -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/main"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:background="@drawable/gradient_background">
 
         <!-- Header -->
         <LinearLayout
             android:id="@+id/headerLayout"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:gravity="center_vertical"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -47,10 +44,10 @@
                 app:tint="#1E1E1E" />
         </LinearLayout>
 
-        <!-- Строка поиска -->
+        <!-- Поиск -->
         <EditText
             android:id="@+id/etSearch"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="4dp"
@@ -60,12 +57,42 @@
             android:background="@drawable/search_background"
             android:drawableStart="@drawable/ic_search"
             android:drawablePadding="8dp"
-            android:inputType="text"
-            app:layout_constraintTop_toBottomOf="@id/headerLayout"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:inputType="text" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Фильтры -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:scrollbars="none"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <LinearLayout
+                android:id="@+id/filtersContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <!-- Список залов -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp">
+
+            <LinearLayout
+                android:id="@+id/hallsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+
+                />
+        </ScrollView>
+
+    </LinearLayout>
 
     <!-- Меню справа -->
     <com.google.android.material.navigation.NavigationView
