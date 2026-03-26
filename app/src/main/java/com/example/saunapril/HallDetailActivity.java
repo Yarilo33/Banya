@@ -46,7 +46,7 @@ public class HallDetailActivity extends AppCompatActivity {
     private static final String KEY_TOKEN = "jwt_token";
 
     private TextView tvName, tvPrice, tvDescription, tvPhotoCounter;
-    private TextView tvMonthYear, tvSelectedDate, tvSelectedTime;
+    private TextView tvMonthYear, tvSelectedDate, tvSelectedTime, tvTotalPrice;
     private LinearLayout typesContainer, dotsContainer, weekdaysContainer;
     private LinearLayout calendarCard, timeSelectionCard;
     private ImageView ivCurrentPhoto;
@@ -55,6 +55,7 @@ public class HallDetailActivity extends AppCompatActivity {
     private ImageButton btnBack, btnPrev, btnNext, btnPrevMonth, btnNextMonth;
 
     private int hallId;
+    private int hourlyPrice = 0;
     private List<String> photoUrls = new ArrayList<>();
     private int currentPhotoIndex = 0;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -98,6 +99,7 @@ public class HallDetailActivity extends AppCompatActivity {
         tvMonthYear = findViewById(R.id.tvMonthYear);
         tvSelectedDate = findViewById(R.id.tvSelectedDate);
         tvSelectedTime = findViewById(R.id.tvSelectedTime);
+        tvTotalPrice = findViewById(R.id.tvTotalPrice);
         typesContainer = findViewById(R.id.typesContainer);
         dotsContainer = findViewById(R.id.dotsContainer);
         weekdaysContainer = findViewById(R.id.weekdaysContainer);
@@ -156,8 +158,6 @@ public class HallDetailActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
-//    возможно можно было и проще, но это первое, что мне пришло в голову..
     private void initWeekdays() {
         weekdaysContainer.removeAllViews();
         String[] weekdays = {"Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"};
@@ -173,6 +173,8 @@ public class HallDetailActivity extends AppCompatActivity {
             weekdaysContainer.addView(tv);
         }
     }
+
+//    первое что пришло в голову...
 
     private void updateCalendar() {
         String[] months = {
@@ -269,7 +271,6 @@ public class HallDetailActivity extends AppCompatActivity {
         btnConfirmDate.setVisibility(View.VISIBLE);
 
         resetTimeSelection();
-
         bookedTimeSlots.clear();
     }
 
@@ -287,6 +288,7 @@ public class HallDetailActivity extends AppCompatActivity {
         selectedStartTimeStr = "";
         selectedEndTimeStr = "";
         tvSelectedTime.setVisibility(View.GONE);
+        tvTotalPrice.setVisibility(View.GONE);
 
         if (selectedStartButton != null) {
             selectedStartButton.setBackgroundResource(R.drawable.calendar_available);
@@ -377,8 +379,8 @@ public class HallDetailActivity extends AppCompatActivity {
             timeSlotsGrid.addView(timeBtn);
         }
 
-        tvSelectedTime.setText("Нажмите на время начала, затем на время окончания");
         tvSelectedTime.setVisibility(View.VISIBLE);
+        tvTotalPrice.setVisibility(View.GONE);
     }
 
     private String getEndTime(String startTime) {
@@ -421,6 +423,7 @@ public class HallDetailActivity extends AppCompatActivity {
             selectedEndTimeStr = endTime;
             btn.setBackgroundResource(R.drawable.calendar_selected);
             tvSelectedTime.setText("Начало: " + startTime + "-" + endTime + " (выберите окончание)");
+            tvTotalPrice.setVisibility(View.GONE);
         } else if (selectedEndButton == null) {
             int startHour = Integer.parseInt(selectedStartTimeStr.split(":")[0]);
             int endHour = Integer.parseInt(startTime.split(":")[0]);
@@ -441,7 +444,13 @@ public class HallDetailActivity extends AppCompatActivity {
 
             highlightRange(selectedStartTimeStr, startTime);
 
+            // Рассчитываем стоимость
+            int hours = endHour - startHour + 1;
+            int totalPrice = hourlyPrice * hours;
+
             tvSelectedTime.setText("Выбрано: " + selectedStartTimeStr + " - " + selectedEndTimeStr);
+            tvTotalPrice.setText("Итого: " + totalPrice + " ₽ (" + hours + " ч.)");
+            tvTotalPrice.setVisibility(View.VISIBLE);
             btnBook.setVisibility(View.VISIBLE);
         } else {
             clearTimeHighlight();
@@ -449,6 +458,7 @@ public class HallDetailActivity extends AppCompatActivity {
             selectedEndButton = null;
             selectedStartTimeStr = "";
             selectedEndTimeStr = "";
+            tvTotalPrice.setVisibility(View.GONE);
             selectTimeRange(startTime, endTime, btn);
         }
     }
@@ -640,7 +650,8 @@ public class HallDetailActivity extends AppCompatActivity {
             if (hall == null) return;
 
             tvName.setText(hall.optString("name", "Без названия"));
-            tvPrice.setText(hall.optInt("price_hourly", 0) + " ₽/час");
+            hourlyPrice = hall.optInt("price_hourly", 0);
+            tvPrice.setText(hourlyPrice + " ₽/час");
             tvDescription.setText(hall.optString("description", "Описание отсутствует"));
 
             JSONArray types = hall.optJSONArray("types");
