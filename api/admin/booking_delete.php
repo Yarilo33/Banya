@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once '../config.php';
+require_once '../services/NotificationService.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
     http_response_code(405);
@@ -58,6 +59,24 @@ try {
     // Удаляем бронирование
     $stmt = $pdo->prepare("DELETE FROM bookings WHERE booking_id = ?");
     $stmt->execute([$bookingId]);
+
+    // Отправляем push-уведомление пользователю
+    if ($booking['user_id']) {
+        // Получаем OneSignal ID пользователя
+        $stmt = $pdo->prepare("SELECT onesignal_player_id FROM users WHERE user_id = ?");
+        $stmt->execute([$booking['user_id']]);
+        $user = $stmt->fetch();
+
+        if ($user && $user['onesignal_player_id']) {
+            $notificationService = new NotificationService();
+            $notificationService->sendBookingDeleted(
+                $user['onesignal_player_id'],
+                $booking['hall_name'],
+                $booking['booking_date'],
+                substr($booking['start_time'], 0, 5)
+            );
+        }
+    }
     
     echo json_encode([
         'success' => true,
