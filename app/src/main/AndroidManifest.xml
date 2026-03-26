@@ -35,5 +35,11 @@
             android:label="Залы"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".HallDetailActivity"
+            android:exported="false"
+            android:label="Зал"
+            android:parentActivityName=".MainActivity" />
+
     </application>
 </manifest>

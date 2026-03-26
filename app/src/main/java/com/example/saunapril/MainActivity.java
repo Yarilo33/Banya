@@ -1,5 +1,5 @@
 package com.example.saunapril;
-
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.widget.AppCompatTextView;
@@ -265,9 +265,11 @@ public class MainActivity extends BaseActivity {
             loadImage(fullUrl, ivPhoto);
         }
 
-        card.setOnClickListener(v ->
-                Toast.makeText(this, "Зал: " + name, Toast.LENGTH_SHORT).show()
-        );
+        card.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, HallDetailActivity.class);
+            intent.putExtra("hall_id", hall.optInt("id", 0));
+            startActivity(intent);
+        });
 
         hallsContainer.addView(card);
     }
