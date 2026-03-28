@@ -1,3 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SaunaPril</string>
+    <!-- Приложение -->
+    <string name="app_name">Новосельские бани</string>
+
+    <!-- API (базовый URL) -->
+    <string name="api_base_url">http://10.51.185.164/api</string>
+
+    <!-- Ключи SharedPreferences -->
+    <string name="pref_name">auth_prefs</string>
+    <string name="pref_key_token">jwt_token</string>
+    <string name="pref_key_user">user_data</string>
+    <string name="pref_key_role">user_role</string>
+
+    <!-- Авторизация -->
+    <string name="auth_title">Авторизация</string>
+    <string name="auth_hint_phone">Номер телефона</string>
+    <string name="auth_hint_password">Пароль</string>
+    <string name="auth_btn_login">Авторизоваться</string>
+    <string name="auth_btn_register">Регистрация</string>
+    <string name="auth_btn_back">Вернуться на главную страницу</string>
+    <string name="auth_msg_fill_fields">Заполните все поля</string>
+    <string name="auth_msg_success">Вход выполнен успешно</string>
+    <string name="auth_msg_error">Ошибка авторизации</string>
+    <string name="auth_msg_network_error">Ошибка сети</string>
+    <string name="auth_msg_registration_unavailable">Регистрация пока недоступна</string>
+
+    <!-- Главная -->
+    <string name="main_title">Новосельские бани</string>
+    <string name="main_hint_search">Поиск зала</string>
+    <string name="main_menu_desc">Меню</string>
+    <string name="main_msg_halls_not_found">Залы не найдены</string>
+    <string name="main_msg_error">Ошибка</string>
+    <string name="main_msg_network_error">Ошибка сети</string>
+    <string name="main_unit_price">руб/час</string>
+
+    <!-- Типы бань -->
+    <string name="bath_type_hamam">Хамам</string>
+    <string name="bath_type_russian">Русская</string>
+    <string name="bath_type_siberian">Сибирская</string>
+    <string name="bath_type_turkish">Турецкая</string>
+
+    <!-- Админ-панель -->
+    <string name="admin_title">Управление залами</string>
+    <string name="admin_btn_add">+ Добавить зал</string>
+    <string name="admin_btn_edit">Изменить зал</string>
+    <string name="admin_btn_delete">Удалить</string>
+    <string name="admin_btn_add_photo">+ Добавить фото</string>
+    <string name="admin_btn_delete_photo">Удалить фото</string>
+    <string name="admin_label_photos">Фотографии зала:</string>
+    <string name="admin_label_actions">Действия:</string>
+    <string name="admin_label_features">Особенности:</string>
+    <string name="admin_label_description">Описание:</string>
+    <string name="admin_label_capacity">Вместимость</string>
+    <string name="admin_label_price">Цена за час</string>
+    <string name="admin_label_bath_types">Типы бань:</string>
+    <string name="admin_msg_hall_created">Зал создан</string>
+    <string name="admin_msg_hall_updated">Зал обновлен</string>
+    <string name="admin_msg_hall_deleted">Зал удален</string>
+    <string name="admin_msg_photo_uploaded">Фото загружено</string>
+    <string name="admin_msg_photo_deleted">Фото удалено</string>
+    <string name="admin_msg_auth_required">Требуется авторизация</string>
+    <string name="admin_msg_admin_only">Только для администраторов</string>
+    <string name="admin_dialog_create_title">Создание нового зала</string>
+    <string name="admin_dialog_edit_title">Редактирование зала</string>
+    <string name="admin_dialog_delete_title">Удалить зал</string>
+    <string name="admin_dialog_delete_photo_title">Удалить фотографию</string>
+    <string name="admin_dialog_confirm">Подтвердить</string>
+    <string name="admin_dialog_cancel">Отмена</string>
+    <string name="admin_msg_enter_name">Введите название зала</string>
+    <string name="admin_msg_enter_price">Введите цену</string>
+    <string name="admin_msg_enter_capacity">Введите вместимость</string>
+    <string name="admin_msg_select_bath_type">Выберите хотя бы один тип бани</string>
+
+    <!-- Детали зала -->
+    <string name="detail_title">Детали зала</string>
+    <string name="detail_btn_back">Назад</string>
+    <string name="detail_btn_prev">Предыдущее фото</string>
+    <string name="detail_btn_next">Следующее фото</string>
+    <string name="detail_label_features">Особенности:</string>
+    <string name="detail_label_description">Описание:</string>
+    <string name="detail_label_no_description">Описание отсутствует</string>
+    <string name="detail_label_no_name">Без названия</string>
+    <string name="detail_unit_price">₽/час</string>
+    <string name="detail_unit_total">₽</string>
+    <string name="detail_label_hours">ч.</string>
+
+    <!-- Календарь -->
+    <string name="calendar_label_select_date">Выбран день:</string>
+    <string name="calendar_btn_confirm">Подтвердить день</string>
+    <string name="calendar_btn_loading">Загрузка...</string>
+    <string name="calendar_label_select_time">Выберите время:</string>
+    <string name="calendar_label_selected_time">Выбрано время:</string>
+    <string name="calendar_label_total">Итого:</string>
+    <string name="calendar_btn_book">Забронировать</string>
+    <string name="calendar_btn_booking">Бронирование...</string>
+    <string name="calendar_msg_select_date">Выберите дату</string>
+    <string name="calendar_msg_select_time">Выберите диапазон времени</string>
+    <string name="calendar_msg_success">Бронирование успешно создано!</string>
+    <string name="calendar_msg_error">Ошибка бронирования</string>
+    <string name="calendar_msg_end_after_start">Время окончания должно быть позже начала</string>
+    <string name="calendar_msg_select_different_time">Выберите другое время для окончания</string>
+    <string name="calendar_msg_load_error">Ошибка загрузки времени</string>
+
+    <!-- Дни недели -->
+    <string name="weekday_mon">Пн</string>
+    <string name="weekday_tue">Вт</string>
+    <string name="weekday_wed">Ср</string>
+    <string name="weekday_thu">Чт</string>
+    <string name="weekday_fri">Пт</string>
+    <string name="weekday_sat">Сб</string>
+    <string name="weekday_sun">Вс</string>
+
+    <!-- Месяцы -->
+    <string name="month_jan">Январь</string>
+    <string name="month_feb">Февраль</string>
+    <string name="month_mar">Март</string>
+    <string name="month_apr">Апрель</string>
+    <string name="month_may">Май</string>
+    <string name="month_jun">Июнь</string>
+    <string name="month_jul">Июль</string>
+    <string name="month_aug">Август</string>
+    <string name="month_sep">Сентябрь</string>
+    <string name="month_oct">Октябрь</string>
+    <string name="month_nov">Ноябрь</string>
+    <string name="month_dec">Декабрь</string>
+
+    <!-- Меню навигации -->
+    <string name="nav_main">Главная</string>
+    <string name="nav_login">Войти</string>
+    <string name="nav_logout">Выйти</string>
+    <string name="nav_edit_halls">Управление залами</string>
+    <string name="nav_edit_bookings">Редактирование броней</string>
+    <string name="nav_msg_logout_confirm">Вы действительно хотите выйти из аккаунта?</string>
+    <string name="nav_msg_logged_out">Вы вышли из аккаунта</string>
+
+    <!-- Общее -->
+    <string name="common_error">Ошибка</string>
+    <string name="common_ok">OK</string>
+    <string name="common_yes">Да</string>
+    <string name="common_no">Нет</string>
+    <string name="common_loading">Загрузка...</string>
 </resources>
