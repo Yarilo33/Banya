@@ -95,7 +95,7 @@
     <string name="detail_label_no_name">Без названия</string>
     <string name="detail_unit_price">₽/час</string>
     <string name="detail_unit_total">₽</string>
-    <string name="detail_label_hours">ч.</string>
+    <string name="detail_label_hours">чел.</string>
 
     <!-- Календарь -->
     <string name="calendar_label_select_date">Выбран день:</string>

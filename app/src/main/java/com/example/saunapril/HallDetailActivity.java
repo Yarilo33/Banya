@@ -44,6 +44,7 @@ public class HallDetailActivity extends AppCompatActivity {
 
     private TextView tvName, tvPrice, tvDescription, tvPhotoCounter;
     private TextView tvMonthYear, tvSelectedDate, tvSelectedTime, tvTotalPrice;
+    private TextView tvCapacity;
     private LinearLayout typesContainer, dotsContainer, weekdaysContainer;
     private LinearLayout calendarCard, timeSelectionCard;
     private ImageView ivCurrentPhoto;
@@ -91,6 +92,7 @@ public class HallDetailActivity extends AppCompatActivity {
         tvPrice = findViewById(R.id.tvPrice);
         tvDescription = findViewById(R.id.tvDescription);
         tvPhotoCounter = findViewById(R.id.tvPhotoCounter);
+        tvCapacity = findViewById(R.id.tvCapacity);
         tvMonthYear = findViewById(R.id.tvMonthYear);
         tvSelectedDate = findViewById(R.id.tvSelectedDate);
         tvSelectedTime = findViewById(R.id.tvSelectedTime);
@@ -644,6 +646,13 @@ public class HallDetailActivity extends AppCompatActivity {
             hourlyPrice = hall.optInt("price_hourly", 0);
             tvPrice.setText(hourlyPrice + " " + getString(R.string.detail_unit_price));
             tvDescription.setText(hall.optString("description", getString(R.string.detail_label_no_description)));
+
+            int capacity = hall.optInt("capacity", 0);
+            if (capacity > 0) {
+                tvCapacity.setText(String.valueOf(capacity));
+            } else {
+                tvCapacity.setText("-");
+            }
 
             JSONArray types = hall.optJSONArray("types");
             typesContainer.removeAllViews();
