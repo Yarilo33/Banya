@@ -17,8 +17,8 @@ import com.google.android.material.navigation.NavigationView;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
+    protected DrawerLayout drawerLayout;
+    protected NavigationView navigationView;
 
     // константы из конфига
     private static final String PREF_NAME = Config.PREF_NAME;
@@ -64,12 +64,12 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             } else if (id == R.id.nav_edit_bookings) {
                 if (isAdmin()) {
-                    Toast.makeText(this, R.string.nav_edit_bookings, Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, BookingsActivity.class));
+                    finish();
                 } else {
                     Toast.makeText(this, R.string.admin_msg_admin_only, Toast.LENGTH_SHORT).show();
                 }
             }
-
             drawerLayout.closeDrawer(GravityCompat.END);
             return true;
         });

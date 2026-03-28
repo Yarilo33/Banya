@@ -134,6 +134,19 @@
     <string name="nav_msg_logout_confirm">Вы действительно хотите выйти из аккаунта?</string>
     <string name="nav_msg_logged_out">Вы вышли из аккаунта</string>
 
+    <!-- Бронирования -->
+    <string name="bookings_title">Существующие брони</string>
+    <string name="booking_label_name">Название:</string>
+    <string name="booking_label_phone">Телефон заказчика:</string>
+    <string name="booking_label_date">Дата брони:</string>
+    <string name="booking_label_time">Начало и конец брони:</string>
+    <string name="booking_btn_delete">Удалить</string>
+    <string name="booking_msg_delete_confirm">Вы уверены, что хотите удалить бронирование?</string>
+    <string name="booking_msg_deleted">Бронирование удалено</string>
+    <string name="booking_msg_no_bookings">Бронирования не найдены</string>
+    <string name="menu_description">Меню</string>
+
+
     <!-- Общее -->
     <string name="common_error">Ошибка</string>
     <string name="common_ok">OK</string>

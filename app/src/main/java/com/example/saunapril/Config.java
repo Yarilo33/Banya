@@ -8,7 +8,9 @@ public final class Config {
     public static final String API_LOGIN = API_BASE + "/login.php";
     public static final String API_USER_HALLS = API_BASE + "/user/halls.php";
     public static final String API_HALL_DETAIL = API_BASE + "/user/halls_detail.php?id=";
+    public static final String API_BOOKING_DELETE = API_BASE + "/admin/booking_delete.php?id=";
     public static final String API_BOOKING_CREATE = API_BASE + "/user/booking_create.php";
+    public static final String API_BOOKING_LIST = API_BASE + "/admin/bookings_list.php";
     public static final String API_ADMIN_HALL_LIST = API_BASE + "/admin/hall_list.php";
     public static final String API_ADMIN_HALL_CREATE = API_BASE + "/admin/hall_create.php";
     public static final String API_ADMIN_HALL_UPDATE = API_BASE + "/admin/hall_update.php?id=";

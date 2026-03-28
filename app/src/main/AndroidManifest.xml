@@ -40,6 +40,10 @@
             android:exported="false"
             android:label="Зал"
             android:parentActivityName=".MainActivity" />
-
+        <activity
+            android:name=".BookingsActivity"
+            android:exported="false"
+            android:label="Бронирования"
+            android:parentActivityName=".MainActivity" />
     </application>
 </manifest>

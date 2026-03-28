@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/rounded_background"
+    android:layout_marginBottom="16dp"
+    android:elevation="2dp">
+
+    <!-- Название зала -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/booking_label_name"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/text_bg_dark"/>
+
+    <TextView
+        android:id="@+id/tvHallName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="#1E1E1E"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Телефон заказчика -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/booking_label_phone"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/text_bg_dark"/>
+
+    <TextView
+        android:id="@+id/tvCustomerPhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="#1E1E1E"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Дата брони -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/booking_label_date"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/text_bg_dark"/>
+
+    <TextView
+        android:id="@+id/tvBookingDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="#1E1E1E"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Время брони -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/booking_label_time"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/text_bg_dark"/>
+
+    <TextView
+        android:id="@+id/tvBookingTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="#1E1E1E"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Разделитель -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Кнопка удалить -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnDelete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/booking_btn_delete"
+        android:textSize="14sp"
+        android:textColor="#1E1E1E"
+        android:background="@drawable/button_outline"
+        android:backgroundTint="@null"
+        android:padding="16dp"/>
+
+</LinearLayout>
