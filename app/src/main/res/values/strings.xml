@@ -25,6 +25,18 @@
     <string name="auth_msg_network_error">Ошибка сети</string>
     <string name="auth_msg_registration_unavailable">Регистрация пока недоступна</string>
 
+
+    <!-- Регистрация -->
+    <string name="auth_btn_back_login">Вернуться на страницу авторизации</string>
+    <string name="reg_title">Регистрация</string>
+    <string name="reg_hint_password_confirm">Подтвердите пароль</string>
+    <string name="reg_btn_register">Зарегистрироваться</string>
+    <string name="reg_msg_success">Регистрация успешна!</string>
+    <string name="reg_msg_error">Ошибка регистрации</string>
+    <string name="reg_msg_passwords_mismatch">Пароли не совпадают</string>
+    <string name="reg_msg_password_short">Пароль должен быть не менее 6 символов</string>
+
+
     <!-- Главная -->
     <string name="main_title">Новосельские бани</string>
     <string name="main_hint_search">Поиск зала</string>

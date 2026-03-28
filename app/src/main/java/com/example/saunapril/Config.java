@@ -6,6 +6,7 @@ public final class Config {
     // API Endpoints
     public static final String API_BASE = "http://10.51.185.164/api";
     public static final String API_LOGIN = API_BASE + "/login.php";
+    public static final String API_REGISTER = API_BASE + "/register.php";
     public static final String API_USER_HALLS = API_BASE + "/user/halls.php";
     public static final String API_HALL_DETAIL = API_BASE + "/user/halls_detail.php?id=";
     public static final String API_BOOKING_DELETE = API_BASE + "/admin/booking_delete.php?id=";

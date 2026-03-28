@@ -22,15 +22,15 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class AuthActivity extends AppCompatActivity {
+public class RegistrationActivity extends AppCompatActivity {
 
-    private EditText etPhone, etPassword;
-    private Button btnLogin, btnRegister;
+    private EditText etPhone, etPassword, etPasswordConfirm;
+    private Button btnRegister;
     private TextView tvBack;
     private ProgressBar progressBar;
 
     // Константы из Config
-    private static final String API_URL = Config.API_LOGIN;
+    private static final String API_URL = Config.API_REGISTER;
     private static final String PREF_NAME = Config.PREF_NAME;
     private static final String KEY_TOKEN = Config.PREF_KEY_TOKEN;
     private static final String KEY_USER = Config.PREF_KEY_USER;
@@ -39,40 +39,44 @@ public class AuthActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_auth);
+        setContentView(R.layout.activity_registration);
 
         etPhone = findViewById(R.id.et_phone);
         etPassword = findViewById(R.id.et_password);
-        btnLogin = findViewById(R.id.btn_login);
+        etPasswordConfirm = findViewById(R.id.et_password_confirm);
         btnRegister = findViewById(R.id.btn_register);
         tvBack = findViewById(R.id.tv_back);
         progressBar = findViewById(R.id.progress_bar);
 
         tvBack.setOnClickListener(v -> finish());
 
-        // Кнопка "Регистрация" и переход на RegistrationActivity
         btnRegister.setOnClickListener(v -> {
-            Intent intent = new Intent(AuthActivity.this, RegistrationActivity.class);
-            startActivity(intent);
-        });
-
-        // Кнопка "Авторизоваться"
-        btnLogin.setOnClickListener(v -> {
             String phone = etPhone.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
+            String passwordConfirm = etPasswordConfirm.getText().toString().trim();
 
-            if (phone.isEmpty() || password.isEmpty()) {
+            if (phone.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
                 Toast.makeText(this, R.string.auth_msg_fill_fields, Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            login(phone, password);
+            if (!password.equals(passwordConfirm)) {
+                Toast.makeText(this, R.string.reg_msg_passwords_mismatch, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (password.length() < 6) {
+                Toast.makeText(this, R.string.reg_msg_password_short, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            register(phone, password);
         });
     }
 
-    private void login(final String phone, final String password) {
+    private void register(final String phone, final String password) {
         progressBar.setVisibility(View.VISIBLE);
-        btnLogin.setEnabled(false);
+        btnRegister.setEnabled(false);
 
         new Thread(() -> {
             try {
@@ -110,7 +114,7 @@ public class AuthActivity extends AppCompatActivity {
 
                 new Handler(Looper.getMainLooper()).post(() -> {
                     progressBar.setVisibility(View.GONE);
-                    btnLogin.setEnabled(true);
+                    btnRegister.setEnabled(true);
 
                     try {
                         JSONObject jsonResult = new JSONObject(response);
@@ -129,14 +133,14 @@ public class AuthActivity extends AppCompatActivity {
                                     .putString(KEY_ROLE, userRole)
                                     .apply();
 
-                            Toast.makeText(AuthActivity.this, R.string.auth_msg_success, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegistrationActivity.this, R.string.reg_msg_success, Toast.LENGTH_SHORT).show();
                             finish();
                         } else {
-                            String message = jsonResult.optString("message", getString(R.string.auth_msg_error));
-                            Toast.makeText(AuthActivity.this, message, Toast.LENGTH_SHORT).show();
+                            String message = jsonResult.optString("message", getString(R.string.reg_msg_error));
+                            Toast.makeText(RegistrationActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
-                        Toast.makeText(AuthActivity.this,
+                        Toast.makeText(RegistrationActivity.this,
                                 getString(R.string.common_error) + ": " + e.getMessage(),
                                 Toast.LENGTH_LONG).show();
                     }
@@ -146,8 +150,8 @@ public class AuthActivity extends AppCompatActivity {
                 e.printStackTrace();
                 new Handler(Looper.getMainLooper()).post(() -> {
                     progressBar.setVisibility(View.GONE);
-                    btnLogin.setEnabled(true);
-                    Toast.makeText(AuthActivity.this,
+                    btnRegister.setEnabled(true);
+                    Toast.makeText(RegistrationActivity.this,
                             getString(R.string.auth_msg_network_error) + ": " + e.getMessage(),
                             Toast.LENGTH_LONG).show();
                 });

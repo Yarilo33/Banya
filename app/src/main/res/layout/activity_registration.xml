@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/gradient_background"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/reg_title"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#1E1E1E"
+        android:layout_marginBottom="32dp"/>
+
+    <EditText
+        android:id="@+id/et_phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/auth_hint_phone"
+        android:inputType="phone"
+        android:padding="16dp"
+        android:background="@drawable/rounded_background"
+        android:layout_marginBottom="16dp"
+        android:textColor="#1E1E1E"
+        android:textColorHint="#999999"/>
+
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/auth_hint_password"
+        android:inputType="textPassword"
+        android:padding="16dp"
+        android:background="@drawable/rounded_background"
+        android:layout_marginBottom="16dp"
+        android:textColor="#1E1E1E"
+        android:textColorHint="#999999"/>
+
+    <EditText
+        android:id="@+id/et_password_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/reg_hint_password_confirm"
+        android:inputType="textPassword"
+        android:padding="16dp"
+        android:background="@drawable/rounded_background"
+        android:layout_marginBottom="24dp"
+        android:textColor="#1E1E1E"
+        android:textColorHint="#999999"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_register"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="@string/reg_btn_register"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/button_orange"
+        android:backgroundTint="@null"
+        android:layout_marginBottom="16dp"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tv_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/auth_btn_back_login"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:padding="8dp"/>
+
+</LinearLayout>

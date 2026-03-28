@@ -45,5 +45,11 @@
             android:exported="false"
             android:label="Бронирования"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".RegistrationActivity"
+            android:exported="false"
+            android:label="Регистрация"
+            android:parentActivityName=".MainActivity"
+            />
     </application>
 </manifest>
