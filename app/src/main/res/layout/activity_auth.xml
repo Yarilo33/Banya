@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,7 +12,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Авторизация"
+        android:text="@string/auth_title"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#1E1E1E"
@@ -21,7 +22,7 @@
         android:id="@+id/et_phone"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:hint="Номер телефона"
+        android:hint="@string/auth_hint_phone"
         android:inputType="phone"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
@@ -32,7 +33,7 @@
         android:id="@+id/et_password"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:hint="Пароль"
+        android:hint="@string/auth_hint_password"
         android:inputType="textPassword"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
@@ -52,7 +53,7 @@
             android:layout_height="52dp"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="Авторизоваться"
+            android:text="@string/auth_btn_login"
             app:cornerRadius="8dp"
             app:backgroundTint="#F0A55B"
             android:textColor="#FFFFFF"/>
@@ -63,7 +64,7 @@
             android:layout_height="52dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="Регистрация"
+            android:text="@string/auth_btn_register"
             app:cornerRadius="8dp"
             app:backgroundTint="#F8F8F8"
             android:textColor="#1E1E1E"/>
@@ -73,7 +74,7 @@
         android:id="@+id/tv_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Вернуться на главную страницу"
+        android:text="@string/auth_btn_back"
         android:textColor="#1E1E1E"
         android:clickable="true"
         android:focusable="true"
@@ -85,5 +86,4 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:layout_marginTop="16dp"/>
-
 </LinearLayout>

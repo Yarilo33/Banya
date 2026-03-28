@@ -17,20 +17,20 @@
         android:layout_width="match_parent"
         android:layout_height="280dp">
 
-        <!-- Фото -->
+        <!--  Фото -->
         <ImageView
             android:id="@+id/ivHallPhoto"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop" />
 
-        <!-- Затемнение -->
+        <!-- Затемнение снизу -->
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/gradient_overlay_bottom" />
 
-        <!-- Чёрный контейнер -->
+        <!-- Контейнер с текстом -->
         <LinearLayout
             android:id="@+id/textContainer"
             android:layout_width="match_parent"
@@ -38,7 +38,7 @@
             android:layout_gravity="bottom"
             android:orientation="vertical"
             android:padding="12dp"
-            android:background="#CC000000">
+            android:background="#CC1A1A1A">
 
             <!-- Верх: название + цена -->
             <LinearLayout
@@ -47,7 +47,7 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
-                <!-- Название -->
+                <!--  Название  -->
                 <TextView
                     android:id="@+id/tvName"
                     android:layout_width="0dp"
@@ -57,35 +57,32 @@
                     android:textStyle="bold"
                     android:textColor="#FFFFFF"
                     android:maxLines="2"
-                    android:ellipsize="end"/>
+                    android:ellipsize="end" />
 
-                <!-- Цена -->
+                <!--  Цена  -->
                 <TextView
                     android:id="@+id/tvPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="#FB9646"/>
+                    android:textColor="#FB9646" />
             </LinearLayout>
 
-            <!-- Линия -->
+            <!-- Разделитель -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:background="#66FFFFFF"/>
+                android:background="#66FFFFFF" />
 
-            <!-- Чипсы -->
+            <!--  Чипсы типов бань-->
             <LinearLayout
                 android:id="@+id/typesContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"/>
-
+                android:orientation="horizontal" />
         </LinearLayout>
-
     </FrameLayout>
-
 </androidx.cardview.widget.CardView>

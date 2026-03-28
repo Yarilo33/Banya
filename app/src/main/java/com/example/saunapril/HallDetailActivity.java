@@ -12,18 +12,14 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -39,11 +35,12 @@ import java.util.Set;
 
 public class HallDetailActivity extends AppCompatActivity {
 
-    private static final String BASE_URL = "http://10.51.185.164/api/user/halls_detail.php?id=";
-    private static final String PHOTO_BASE_URL = "http://10.51.185.164/api";
-    private static final String BOOKING_URL = "http://10.51.185.164/api/user/booking_create.php";
-    private static final String PREF_NAME = "auth_prefs";
-    private static final String KEY_TOKEN = "jwt_token";
+    // ✅ Используем константы из Config
+    private static final String API_HALL_DETAIL = Config.API_HALL_DETAIL;
+    private static final String BASE_PHOTO_URL = Config.API_BASE;
+    private static final String API_BOOKING_CREATE = Config.API_BOOKING_CREATE;
+    private static final String PREF_NAME = Config.PREF_NAME;
+    private static final String KEY_TOKEN = Config.PREF_KEY_TOKEN;
 
     private TextView tvName, tvPrice, tvDescription, tvPhotoCounter;
     private TextView tvMonthYear, tvSelectedDate, tvSelectedTime, tvTotalPrice;
@@ -69,10 +66,8 @@ public class HallDetailActivity extends AppCompatActivity {
     private Button selectedEndButton = null;
     private Set<String> bookedTimeSlots = new HashSet<>();
 
-    private final String[] TIME_SLOTS = {
-            "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
-            "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
-    };
+    // тайм слоты для записи из конфига
+    private static final String[] TIME_SLOTS = Config.TIME_SLOTS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +76,7 @@ public class HallDetailActivity extends AppCompatActivity {
 
         hallId = getIntent().getIntExtra("hall_id", 0);
         if (hallId == 0) {
-            Toast.makeText(this, "Ошибка: ID зала не передан", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.common_error, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -153,14 +148,15 @@ public class HallDetailActivity extends AppCompatActivity {
     }
 
     private void redirectToAuth() {
-        Toast.makeText(this, "Требуется авторизация", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.admin_msg_auth_required, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
     }
 
     private void initWeekdays() {
         weekdaysContainer.removeAllViews();
-        String[] weekdays = {"Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"};
+        // ✅ Получаем дни недели из resources
+        String[] weekdays = getResources().getStringArray(R.array.weekdays);
         for (String day : weekdays) {
             TextView tv = new TextView(this);
             tv.setText(day);
@@ -174,13 +170,9 @@ public class HallDetailActivity extends AppCompatActivity {
         }
     }
 
-//    первое что пришло в голову...
-
     private void updateCalendar() {
-        String[] months = {
-                "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
-        };
+        // ✅ Получаем месяцы из resources
+        String[] months = getResources().getStringArray(R.array.months);
 
         int month = currentCalendar.get(Calendar.MONTH);
         int year = currentCalendar.get(Calendar.YEAR);
@@ -266,7 +258,7 @@ public class HallDetailActivity extends AppCompatActivity {
         }
 
         btn.setBackgroundResource(R.drawable.calendar_selected);
-        tvSelectedDate.setText("Выбран день: " + formatDateForDisplay(dateStr));
+        tvSelectedDate.setText(getString(R.string.calendar_label_select_date) + " " + formatDateForDisplay(dateStr));
         tvSelectedDate.setVisibility(View.VISIBLE);
         btnConfirmDate.setVisibility(View.VISIBLE);
 
@@ -305,15 +297,15 @@ public class HallDetailActivity extends AppCompatActivity {
         if (selectedDateStr.isEmpty()) return;
 
         btnConfirmDate.setEnabled(false);
-        btnConfirmDate.setText("Загрузка...");
+        btnConfirmDate.setText(R.string.calendar_btn_loading);
 
         new Thread(() -> {
             try {
-                URL url = new URL(BASE_URL + hallId + "&date=" + selectedDateStr);
+                URL url = new URL(API_HALL_DETAIL + hallId + "&date=" + selectedDateStr);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(Config.CONNECT_TIMEOUT);
+                conn.setReadTimeout(Config.READ_TIMEOUT);
 
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(conn.getInputStream(), "UTF-8")
@@ -344,20 +336,20 @@ public class HallDetailActivity extends AppCompatActivity {
 
                         showTimeSelection();
                         btnConfirmDate.setEnabled(true);
-                        btnConfirmDate.setText("Подтвердить день");
+                        btnConfirmDate.setText(R.string.calendar_btn_confirm);
 
                     } catch (Exception e) {
-                        Toast.makeText(this, "Ошибка загрузки времени", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.calendar_msg_load_error, Toast.LENGTH_SHORT).show();
                         btnConfirmDate.setEnabled(true);
-                        btnConfirmDate.setText("Подтвердить день");
+                        btnConfirmDate.setText(R.string.calendar_btn_confirm);
                     }
                 });
 
             } catch (Exception e) {
                 mainHandler.post(() -> {
-                    Toast.makeText(this, "Ошибка сети", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.auth_msg_network_error, Toast.LENGTH_SHORT).show();
                     btnConfirmDate.setEnabled(true);
-                    btnConfirmDate.setText("Подтвердить день");
+                    btnConfirmDate.setText(R.string.calendar_btn_confirm);
                 });
             }
         }).start();
@@ -422,19 +414,19 @@ public class HallDetailActivity extends AppCompatActivity {
             selectedStartTimeStr = startTime;
             selectedEndTimeStr = endTime;
             btn.setBackgroundResource(R.drawable.calendar_selected);
-            tvSelectedTime.setText("Начало: " + startTime + "-" + endTime + " (выберите окончание)");
+            tvSelectedTime.setText(getString(R.string.calendar_label_selected_time) + " " + startTime + "-" + endTime + " (" + getString(R.string.calendar_msg_select_different_time) + ")");
             tvTotalPrice.setVisibility(View.GONE);
         } else if (selectedEndButton == null) {
             int startHour = Integer.parseInt(selectedStartTimeStr.split(":")[0]);
             int endHour = Integer.parseInt(startTime.split(":")[0]);
 
             if (endHour < startHour) {
-                Toast.makeText(this, "Время окончания должно быть позже начала", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.calendar_msg_end_after_start, Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (endHour == startHour) {
-                Toast.makeText(this, "Выберите другое время для окончания", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.calendar_msg_select_different_time, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -448,8 +440,8 @@ public class HallDetailActivity extends AppCompatActivity {
             int hours = endHour - startHour + 1;
             int totalPrice = hourlyPrice * hours;
 
-            tvSelectedTime.setText("Выбрано: " + selectedStartTimeStr + " - " + selectedEndTimeStr);
-            tvTotalPrice.setText("Итого: " + totalPrice + " ₽ (" + hours + " ч.)");
+            tvSelectedTime.setText(getString(R.string.calendar_label_selected_time) + " " + selectedStartTimeStr + " - " + selectedEndTimeStr);
+            tvTotalPrice.setText(getString(R.string.calendar_label_total) + " " + totalPrice + " " + getString(R.string.detail_unit_total) + " (" + hours + " " + getString(R.string.detail_label_hours) + ")");
             tvTotalPrice.setVisibility(View.VISIBLE);
             btnBook.setVisibility(View.VISIBLE);
         } else {
@@ -500,30 +492,30 @@ public class HallDetailActivity extends AppCompatActivity {
 
     private void createBooking() {
         if (selectedDateStr.isEmpty()) {
-            Toast.makeText(this, "Выберите дату", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.calendar_msg_select_date, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (selectedStartTimeStr.isEmpty() || selectedEndTimeStr.isEmpty()) {
-            Toast.makeText(this, "Выберите диапазон времени", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.calendar_msg_select_time, Toast.LENGTH_SHORT).show();
             return;
         }
 
         btnBook.setEnabled(false);
-        btnBook.setText("Бронирование...");
+        btnBook.setText(R.string.calendar_btn_booking);
 
         new Thread(() -> {
             try {
                 SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
                 String token = prefs.getString(KEY_TOKEN, "");
 
-                URL url = new URL(BOOKING_URL);
+                URL url = new URL(API_BOOKING_CREATE);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 conn.setRequestProperty("Authorization", "Bearer " + token);
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(Config.CONNECT_TIMEOUT);
+                conn.setReadTimeout(Config.READ_TIMEOUT);
                 conn.setDoOutput(true);
 
                 JSONObject json = new JSONObject();
@@ -553,31 +545,30 @@ public class HallDetailActivity extends AppCompatActivity {
 
                 mainHandler.post(() -> {
                     btnBook.setEnabled(true);
-                    btnBook.setText("Забронировать");
+                    btnBook.setText(R.string.calendar_btn_book);
 
                     try {
                         JSONObject jsonResponse = new JSONObject(cleanJson(response));
 
                         if (responseCode == 200 && jsonResponse.optBoolean("success", false)) {
-                            Toast.makeText(this, "Бронирование успешно создано!", Toast.LENGTH_LONG).show();
-
+                            Toast.makeText(this, R.string.calendar_msg_success, Toast.LENGTH_LONG).show();
                             resetSelection();
                             updateCalendar();
                         } else {
                             String message = jsonResponse.optString("error",
-                                    jsonResponse.optString("message", "Ошибка бронирования"));
+                                    jsonResponse.optString("message", getString(R.string.calendar_msg_error)));
                             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
-                        Toast.makeText(this, "Ошибка: " + response, Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, getString(R.string.common_error) + ": " + response, Toast.LENGTH_LONG).show();
                     }
                 });
 
             } catch (Exception e) {
                 mainHandler.post(() -> {
                     btnBook.setEnabled(true);
-                    btnBook.setText("Забронировать");
-                    Toast.makeText(this, "Ошибка сети: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    btnBook.setText(R.string.calendar_btn_book);
+                    Toast.makeText(this, getString(R.string.auth_msg_network_error) + ": " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
             }
         }).start();
@@ -613,11 +604,11 @@ public class HallDetailActivity extends AppCompatActivity {
     private void loadHallDetails() {
         new Thread(() -> {
             try {
-                URL url = new URL(BASE_URL + hallId);
+                URL url = new URL(API_HALL_DETAIL + hallId);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(Config.CONNECT_TIMEOUT);
+                conn.setReadTimeout(Config.READ_TIMEOUT);
 
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(conn.getInputStream(), "UTF-8")
@@ -631,7 +622,7 @@ public class HallDetailActivity extends AppCompatActivity {
 
             } catch (Exception e) {
                 mainHandler.post(() ->
-                        Toast.makeText(this, "Ошибка сети: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.auth_msg_network_error) + ": " + e.getMessage(), Toast.LENGTH_LONG).show()
                 );
             }
         }).start();
@@ -641,7 +632,7 @@ public class HallDetailActivity extends AppCompatActivity {
         try {
             JSONObject json = new JSONObject(cleanJson(response));
             if (!json.optBoolean("success", false)) {
-                Toast.makeText(this, json.optString("message", "Ошибка"), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, json.optString("message", getString(R.string.common_error)), Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
@@ -649,10 +640,10 @@ public class HallDetailActivity extends AppCompatActivity {
             JSONObject hall = json.optJSONObject("hall");
             if (hall == null) return;
 
-            tvName.setText(hall.optString("name", "Без названия"));
+            tvName.setText(hall.optString("name", getString(R.string.detail_label_no_name)));
             hourlyPrice = hall.optInt("price_hourly", 0);
-            tvPrice.setText(hourlyPrice + " ₽/час");
-            tvDescription.setText(hall.optString("description", "Описание отсутствует"));
+            tvPrice.setText(hourlyPrice + " " + getString(R.string.detail_unit_price));
+            tvDescription.setText(hall.optString("description", getString(R.string.detail_label_no_description)));
 
             JSONArray types = hall.optJSONArray("types");
             typesContainer.removeAllViews();
@@ -674,7 +665,7 @@ public class HallDetailActivity extends AppCompatActivity {
                     if (photo != null) {
                         String url = photo.optString("url", "");
                         if (!url.isEmpty()) {
-                            String fullUrl = url.startsWith("http") ? url : PHOTO_BASE_URL + url;
+                            String fullUrl = url.startsWith("http") ? url : BASE_PHOTO_URL + url;
                             photoUrls.add(fullUrl);
                         }
                     }
@@ -690,7 +681,7 @@ public class HallDetailActivity extends AppCompatActivity {
             createDots(photoUrls.size());
 
         } catch (Exception e) {
-            Toast.makeText(this, "Ошибка parsing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.common_error) + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

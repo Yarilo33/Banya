@@ -30,13 +30,13 @@
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_menu_revert"
-                android:contentDescription="Назад"/>
+                android:contentDescription="@string/detail_btn_back"/>
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Детали зала"
+                android:text="@string/detail_title"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="#1E1E1E"
@@ -61,8 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:background="#EEEEEE"
-                />
+                android:background="#EEEEEE"/>
 
             <ImageButton
                 android:id="@+id/btnPrev"
@@ -72,7 +71,7 @@
                 android:layout_marginStart="8dp"
                 android:background="#80000000"
                 android:src="@android:drawable/ic_media_previous"
-                android:contentDescription="Предыдущее фото"/>
+                android:contentDescription="@string/detail_btn_prev"/>
 
             <ImageButton
                 android:id="@+id/btnNext"
@@ -82,7 +81,7 @@
                 android:layout_marginEnd="8dp"
                 android:background="#80000000"
                 android:src="@android:drawable/ic_media_next"
-                android:contentDescription="Следующее фото"/>
+                android:contentDescription="@string/detail_btn_next"/>
 
             <TextView
                 android:id="@+id/tvPhotoCounter"
@@ -115,8 +114,7 @@
             android:orientation="vertical"
             android:padding="16dp"
             android:background="@drawable/rounded_background"
-            android:elevation="4dp"
-            >
+            android:elevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -150,7 +148,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Особенности:"
+                android:text="@string/detail_label_features"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="#666666"
@@ -166,7 +164,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Описание:"
+                android:text="@string/detail_label_description"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="#666666"
@@ -192,8 +190,7 @@
             android:orientation="vertical"
             android:padding="16dp"
             android:background="@drawable/rounded_background"
-            android:elevation="4dp"
-            >
+            android:elevation="4dp">
 
             <!-- Заголовок с кнопками навигации -->
             <LinearLayout
@@ -208,7 +205,7 @@
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_media_previous"
-                    android:contentDescription="Предыдущий месяц"/>
+                    android:contentDescription="@string/weekday_mon"/>
 
                 <TextView
                     android:id="@+id/tvMonthYear"
@@ -226,7 +223,7 @@
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@android:drawable/ic_media_next"
-                    android:contentDescription="Следующий месяц"/>
+                    android:contentDescription="@string/weekday_sun"/>
             </LinearLayout>
 
             <!-- Дни недели -->
@@ -257,7 +254,7 @@
                 android:id="@+id/tvSelectedDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Выбран день: "
+                android:text="@string/calendar_label_select_date"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#1E1E1E"
@@ -270,7 +267,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="12dp"
-                android:text="Подтвердить день"
+                android:text="@string/calendar_btn_confirm"
                 android:textSize="16sp"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/button_orange"
@@ -294,7 +291,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Выберите время:"
+                android:text="@string/calendar_label_select_time"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#1E1E1E"/>
@@ -318,7 +315,7 @@
                 android:id="@+id/tvSelectedTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Выбрано время: "
+                android:text="@string/calendar_label_selected_time"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#1E1E1E"
@@ -330,7 +327,7 @@
                 android:id="@+id/tvTotalPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Итого: 0 ₽"
+                android:text="@string/calendar_label_total"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#F0A55B"
@@ -344,13 +341,12 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginHorizontal="8dp"
-                android:text="Забронировать"
+                android:text="@string/calendar_btn_book"
                 android:textSize="18sp"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/button_orange"
                 android:backgroundTint="@null"
                 android:visibility="gone"/>
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

@@ -15,13 +15,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -37,12 +34,19 @@ public class HallsActivity extends BaseActivity {
     private int currentCapacityForUpload = 0;
     private JSONArray currentBathTypesForUpload = null;
 
-    private static final int[] BATH_TYPE_IDS = {1, 2, 3, 4};
-    private static final String[] BATH_TYPE_NAMES = {"Хамам", "Русская", "Сибирская", "Турецкая"};
-
-    private static final String BASE_URL = "http://10.51.185.164/api";
+    // константы из конфига
+    private static final String BASE_URL = Config.API_BASE;
+    private static final String API_HALL_LIST = Config.API_ADMIN_HALL_LIST;
+    private static final String API_HALL_CREATE = Config.API_ADMIN_HALL_CREATE;
+    private static final String API_HALL_UPDATE = Config.API_ADMIN_HALL_UPDATE;
+    private static final String API_HALL_DELETE = Config.API_ADMIN_HALL_DELETE;
+    private static final String PREF_NAME = Config.PREF_NAME;
+    private static final String KEY_TOKEN = Config.PREF_KEY_TOKEN;
     private static final String TAG = "HallsActivity";
-    private static final int REQUEST_IMAGE_PICK = 1001;
+    private static final int REQUEST_IMAGE_PICK = Config.REQUEST_IMAGE_PICK;
+
+    // Типы бань из конфига
+    private static final int[] BATH_TYPE_IDS = Config.BATH_TYPE_IDS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +57,6 @@ public class HallsActivity extends BaseActivity {
         initMenu();
 
         hallsContainer = findViewById(R.id.hallsContainer);
-
 
         Button btnAddHall = findViewById(R.id.btnAddHall);
         btnAddHall.setOnClickListener(v -> showCreateHallDialog());
@@ -76,23 +79,23 @@ public class HallsActivity extends BaseActivity {
     private void loadHalls() {
         new Thread(() -> {
             try {
-                String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                        .getString("jwt_token", "");
+                String token = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+                        .getString(KEY_TOKEN, "");
 
                 if (token.isEmpty()) {
                     runOnUiThread(() -> {
-                        Toast.makeText(this, "Требуется авторизация", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.admin_msg_auth_required, Toast.LENGTH_SHORT).show();
                         finish();
                     });
                     return;
                 }
 
-                URL url = new URL(BASE_URL + "/admin/hall_list.php");
+                URL url = new URL(API_HALL_LIST);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("Authorization", "Bearer " + token);
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(Config.CONNECT_TIMEOUT);
+                conn.setReadTimeout(Config.READ_TIMEOUT);
 
                 int responseCode = conn.getResponseCode();
                 BufferedReader reader = (responseCode >= 200 && responseCode < 300) ?
@@ -109,19 +112,19 @@ public class HallsActivity extends BaseActivity {
 
                 runOnUiThread(() -> {
                     if (finalCode != 200) {
-                        Toast.makeText(this, "Ошибка: " + finalCode, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.common_error) + ": " + finalCode, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     try {
                         parseAndDisplay(response);
                     } catch (Exception e) {
-                        Toast.makeText(this, "Ошибка: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.common_error) + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
             } catch (Exception e) {
                 runOnUiThread(() ->
-                        Toast.makeText(this, "Ошибка сети: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                        Toast.makeText(this, getString(R.string.auth_msg_network_error) + ": " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
         }).start();
     }
@@ -131,13 +134,13 @@ public class HallsActivity extends BaseActivity {
         JSONObject json = new JSONObject(cleanResponse);
 
         if (!json.optBoolean("success", false)) {
-            showError(json.optString("message", "Ошибка"));
+            showError(json.optString("message", getString(R.string.common_error)));
             return;
         }
 
         JSONArray halls = json.optJSONArray("halls");
         if (halls == null || halls.length() == 0) {
-            showError("Залы не найдены");
+            showError(getString(R.string.main_msg_halls_not_found));
             return;
         }
 
@@ -153,14 +156,14 @@ public class HallsActivity extends BaseActivity {
 
     private void showError(String msg) {
         TextView tv = new TextView(this);
-        tv.setText("Ошибка: " + msg);
+        tv.setText(getString(R.string.common_error) + ": " + msg);
         tv.setPadding(16, 16, 16, 16);
         hallsContainer.addView(tv);
     }
 
     private void createHallCard(JSONObject hall) throws Exception {
         int hallId = hall.optInt("id", 0);
-        String name = hall.optString("name", "Без названия");
+        String name = hall.optString("name", getString(R.string.detail_label_no_name));
         String description = hall.optString("description", "");
         int price = hall.optInt("price_hourly", 0);
         int capacity = hall.optInt("capacity", 0);
@@ -168,14 +171,11 @@ public class HallsActivity extends BaseActivity {
         JSONArray photos = hall.optJSONArray("photos");
         JSONArray bathTypes = hall.optJSONArray("bath_types");
 
-        // Надуваем XML-шаблон карточки
         View card = LayoutInflater.from(this).inflate(R.layout.item_hall_card, hallsContainer, false);
 
-        // Название
         TextView tvName = card.findViewById(R.id.tvName);
         tvName.setText(name);
 
-        // Особенности
         TextView tvTypes = card.findViewById(R.id.tvTypes);
         if (bathTypeNames != null && bathTypeNames.length() > 0) {
             StringBuilder types = new StringBuilder();
@@ -183,11 +183,10 @@ public class HallsActivity extends BaseActivity {
                 if (i > 0) types.append(", ");
                 types.append(bathTypeNames.optString(i, ""));
             }
-            tvTypes.setText("Особенности: " + types.toString());
+            tvTypes.setText(getString(R.string.admin_label_features) + " " + types.toString());
             tvTypes.setVisibility(View.VISIBLE);
         }
 
-        // Описание
         TextView tvDescLabel = card.findViewById(R.id.tvDescLabel);
         TextView tvDesc = card.findViewById(R.id.tvDesc);
         if (!description.isEmpty()) {
@@ -196,26 +195,19 @@ public class HallsActivity extends BaseActivity {
             tvDesc.setVisibility(View.VISIBLE);
         }
 
-        // Цена и вместимость
         TextView tvInfo = card.findViewById(R.id.tvInfo);
-        tvInfo.setText("Цена: " + price + " руб./час | Вместимость: " + capacity + " чел.");
+        tvInfo.setText(getString(R.string.admin_label_price) + " " + price + " " + getString(R.string.main_unit_price) +
+                " | " + getString(R.string.admin_label_capacity) + ": " + capacity + " " + getString(R.string.detail_label_hours));
 
-        // Фотографии
         LinearLayout photosRow = card.findViewById(R.id.photosRow);
 
-        // Кнопка добавления фото
         Button btnAddPhoto = new Button(this, null, android.R.attr.buttonStyle);
-
-        btnAddPhoto.setText("+ Добавить фото");
+        btnAddPhoto.setText(getString(R.string.admin_btn_add_photo));
         btnAddPhoto.setTextSize(12);
         btnAddPhoto.setTextColor(0xFFFFFFFF);
-
-//
         btnAddPhoto.setBackgroundResource(R.drawable.button_orange);
         btnAddPhoto.setBackgroundTintList(null);
-
-        LinearLayout.LayoutParams addBtnParams =
-                new LinearLayout.LayoutParams(200, 260);
+        LinearLayout.LayoutParams addBtnParams = new LinearLayout.LayoutParams(200, 260);
         addBtnParams.setMargins(0, 0, 12, 0);
         btnAddPhoto.setLayoutParams(addBtnParams);
 
@@ -227,7 +219,7 @@ public class HallsActivity extends BaseActivity {
         });
 
         photosRow.addView(btnAddPhoto);
-        // Существующие фото
+
         if (photos != null && photos.length() > 0) {
             for (int j = 0; j < photos.length(); j++) {
                 try {
@@ -254,7 +246,7 @@ public class HallsActivity extends BaseActivity {
                     photoContainer.addView(iv);
 
                     Button btnDeletePhoto = new Button(this);
-                    btnDeletePhoto.setText("Удалить фото");
+                    btnDeletePhoto.setText(getString(R.string.admin_btn_delete_photo));
                     btnDeletePhoto.setTextSize(10);
                     LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -263,12 +255,12 @@ public class HallsActivity extends BaseActivity {
                     btnDeletePhoto.setPadding(4, 4, 4, 4);
                     btnDeletePhoto.setOnClickListener(v -> {
                         new AlertDialog.Builder(this)
-                                .setTitle("Удалить фотографию")
-                                .setMessage("Вы уверены?")
-                                .setPositiveButton("Удалить", (dialog, which) -> {
+                                .setTitle(R.string.admin_dialog_delete_photo_title)
+                                .setMessage(R.string.nav_msg_logout_confirm)
+                                .setPositiveButton(R.string.admin_btn_delete, (dialog, which) -> {
                                     deletePhoto(hallId, photoId, photoContainer, capacity, bathTypes);
                                 })
-                                .setNegativeButton("Отмена", null)
+                                .setNegativeButton(R.string.admin_dialog_cancel, null)
                                 .show();
                     });
 
@@ -282,7 +274,6 @@ public class HallsActivity extends BaseActivity {
             }
         }
 
-        // Кнопки действий
         Button btnEdit = card.findViewById(R.id.btnEdit);
         btnEdit.setBackgroundTintList(null);
         btnEdit.setTextColor(0xFFFFFFFF);
@@ -293,10 +284,10 @@ public class HallsActivity extends BaseActivity {
         btnDelete.setTextColor(0xFF1E1E1E);
         btnDelete.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
-                    .setTitle("Удалить зал")
-                    .setMessage("Удалить \"" + name + "\"?")
-                    .setPositiveButton("Удалить", (dialog, which) -> deleteHall(hallId))
-                    .setNegativeButton("Отмена", null)
+                    .setTitle(R.string.admin_dialog_delete_title)
+                    .setMessage(getString(R.string.admin_dialog_delete_title) + " \"" + name + "\"?")
+                    .setPositiveButton(R.string.admin_btn_delete, (dialog, which) -> deleteHall(hallId))
+                    .setNegativeButton(R.string.admin_dialog_cancel, null)
                     .show();
         });
 
@@ -309,35 +300,34 @@ public class HallsActivity extends BaseActivity {
         startActivityForResult(intent, REQUEST_IMAGE_PICK);
     }
 
-    // Диалог создания нового зала
     private void showCreateHallDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Создание нового зала");
+        builder.setTitle(R.string.admin_dialog_create_title);
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(48, 24, 48, 24);
 
         EditText etName = new EditText(this);
-        etName.setHint("Название зала *");
+        etName.setHint(R.string.admin_msg_enter_name);
         layout.addView(etName);
 
         EditText etDescription = new EditText(this);
-        etDescription.setHint("Описание");
+        etDescription.setHint(R.string.admin_label_description);
         layout.addView(etDescription);
 
         EditText etPrice = new EditText(this);
-        etPrice.setHint("Цена за час *");
+        etPrice.setHint(R.string.admin_msg_enter_price);
         etPrice.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         layout.addView(etPrice);
 
         EditText etCapacity = new EditText(this);
-        etCapacity.setHint("Вместимость *");
+        etCapacity.setHint(R.string.admin_msg_enter_capacity);
         etCapacity.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         layout.addView(etCapacity);
 
         TextView tvBathTypes = new TextView(this);
-        tvBathTypes.setText("Типы бань: *");
+        tvBathTypes.setText(R.string.admin_label_bath_types);
         tvBathTypes.setTextSize(14);
         tvBathTypes.setTypeface(null, android.graphics.Typeface.BOLD);
         tvBathTypes.setPadding(0, 16, 0, 8);
@@ -348,10 +338,11 @@ public class HallsActivity extends BaseActivity {
 
         final boolean[] selectedTypes = new boolean[BATH_TYPE_IDS.length];
 
-        for (int i = 0; i < BATH_TYPE_NAMES.length; i++) {
+        String[] bathTypeNames = getResources().getStringArray(R.array.bath_type_names);
+        for (int i = 0; i < bathTypeNames.length; i++) {
             final int index = i;
             CheckBox checkBox = new CheckBox(this);
-            checkBox.setText(BATH_TYPE_NAMES[i]);
+            checkBox.setText(bathTypeNames[i]);
             checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 selectedTypes[index] = isChecked;
             });
@@ -362,24 +353,24 @@ public class HallsActivity extends BaseActivity {
 
         builder.setView(layout);
 
-        builder.setPositiveButton("Создать", (dialog, which) -> {
+        builder.setPositiveButton(R.string.admin_dialog_confirm, (dialog, which) -> {
             String name = etName.getText().toString().trim();
             String description = etDescription.getText().toString().trim();
             String priceStr = etPrice.getText().toString().trim();
             String capacityStr = etCapacity.getText().toString().trim();
 
             if (name.isEmpty()) {
-                Toast.makeText(this, "Введите название зала", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.admin_msg_enter_name, Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (priceStr.isEmpty()) {
-                Toast.makeText(this, "Введите цену", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.admin_msg_enter_price, Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (capacityStr.isEmpty()) {
-                Toast.makeText(this, "Введите вместимость", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.admin_msg_enter_capacity, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -392,7 +383,7 @@ public class HallsActivity extends BaseActivity {
             }
 
             if (!hasSelected) {
-                Toast.makeText(this, "Выберите хотя бы один тип бани", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.admin_msg_select_bath_type, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -409,19 +400,17 @@ public class HallsActivity extends BaseActivity {
                     selectedBathTypes);
         });
 
-        builder.setNegativeButton("Отмена", null);
+        builder.setNegativeButton(R.string.admin_dialog_cancel, null);
         builder.show();
     }
 
-    // Создание зала
     private void createHall(String name, String description, int price, int capacity, JSONArray bathTypes) {
         new Thread(() -> {
             try {
-                String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                        .getString("jwt_token", "");
+                String token = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+                        .getString(KEY_TOKEN, "");
 
-                String urlStr = BASE_URL + "/admin/hall_create.php";
-                URL url = new URL(urlStr);
+                URL url = new URL(API_HALL_CREATE);
 
                 String boundary = "----" + System.currentTimeMillis();
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -430,8 +419,8 @@ public class HallsActivity extends BaseActivity {
                 conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
                 conn.setRequestProperty("Accept-Charset", "UTF-8");
                 conn.setDoOutput(true);
-                conn.setConnectTimeout(15000);
-                conn.setReadTimeout(15000);
+                conn.setConnectTimeout(Config.UPLOAD_TIMEOUT);
+                conn.setReadTimeout(Config.UPLOAD_TIMEOUT);
 
                 DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
 
@@ -459,59 +448,59 @@ public class HallsActivity extends BaseActivity {
 
                 runOnUiThread(() -> {
                     if (responseCode == 200) {
-                        Toast.makeText(this, "Зал создан", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.admin_msg_hall_created, Toast.LENGTH_SHORT).show();
                         loadHalls();
                     } else {
                         try {
                             String clean = cleanJson(response);
                             JSONObject err = new JSONObject(clean);
-                            String msg = err.optString("error", err.optString("message", "Ошибка " + responseCode));
+                            String msg = err.optString("error", err.optString("message", getString(R.string.common_error) + " " + responseCode));
                             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
                         } catch (Exception e) {
-                            Toast.makeText(this, "Ошибка: " + response, Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, getString(R.string.common_error) + ": " + response, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
 
             } catch (Exception e) {
                 runOnUiThread(() ->
-                        Toast.makeText(this, "Ошибка: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                        Toast.makeText(this, getString(R.string.common_error) + ": " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
         }).start();
     }
 
     private void showEditDialog(int hallId, String name, String description, int price, int capacity, JSONArray originalBathTypes) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Редактирование зала");
+        builder.setTitle(R.string.admin_dialog_edit_title);
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(48, 24, 48, 24);
 
         EditText etName = new EditText(this);
-        etName.setHint("Название зала");
+        etName.setHint(R.string.admin_msg_enter_name);
         etName.setText(name);
         layout.addView(etName);
 
         EditText etDescription = new EditText(this);
-        etDescription.setHint("Описание");
+        etDescription.setHint(R.string.admin_label_description);
         etDescription.setText(description);
         layout.addView(etDescription);
 
         EditText etPrice = new EditText(this);
-        etPrice.setHint("Цена за час");
+        etPrice.setHint(R.string.admin_msg_enter_price);
         etPrice.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         etPrice.setText(String.valueOf(price));
         layout.addView(etPrice);
 
         EditText etCapacity = new EditText(this);
-        etCapacity.setHint("Вместимость");
+        etCapacity.setHint(R.string.admin_msg_enter_capacity);
         etCapacity.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         etCapacity.setText(String.valueOf(capacity));
         layout.addView(etCapacity);
 
         TextView tvBathTypes = new TextView(this);
-        tvBathTypes.setText("Типы бань:");
+        tvBathTypes.setText(R.string.admin_label_bath_types);
         tvBathTypes.setTextSize(14);
         tvBathTypes.setTypeface(null, android.graphics.Typeface.BOLD);
         tvBathTypes.setPadding(0, 16, 0, 8);
@@ -534,10 +523,11 @@ public class HallsActivity extends BaseActivity {
             }
         }
 
-        for (int i = 0; i < BATH_TYPE_NAMES.length; i++) {
+        String[] bathTypeNames = getResources().getStringArray(R.array.bath_type_names);
+        for (int i = 0; i < bathTypeNames.length; i++) {
             final int index = i;
             CheckBox checkBox = new CheckBox(this);
-            checkBox.setText(BATH_TYPE_NAMES[i]);
+            checkBox.setText(bathTypeNames[i]);
             checkBox.setChecked(selectedTypes[i]);
             checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 selectedTypes[index] = isChecked;
@@ -549,14 +539,14 @@ public class HallsActivity extends BaseActivity {
 
         builder.setView(layout);
 
-        builder.setPositiveButton("Сохранить", (dialog, which) -> {
+        builder.setPositiveButton(R.string.admin_dialog_confirm, (dialog, which) -> {
             String newName = etName.getText().toString().trim();
             String newDesc = etDescription.getText().toString().trim();
             String newPrice = etPrice.getText().toString().trim();
             String newCapacity = etCapacity.getText().toString().trim();
 
             if (newName.isEmpty()) {
-                Toast.makeText(this, "Введите название зала", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.admin_msg_enter_name, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -569,7 +559,7 @@ public class HallsActivity extends BaseActivity {
             }
 
             if (!hasSelected) {
-                Toast.makeText(this, "Выберите хотя бы один тип бани", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.admin_msg_select_bath_type, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -586,25 +576,25 @@ public class HallsActivity extends BaseActivity {
                     selectedBathTypes);
         });
 
-        builder.setNegativeButton("Отмена", null);
+        builder.setNegativeButton(R.string.admin_dialog_cancel, null);
         builder.show();
     }
 
     private void updateHall(int hallId, String name, String description, int price, int capacity, JSONArray bathTypes) {
         new Thread(() -> {
             try {
-                String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                        .getString("jwt_token", "");
+                String token = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+                        .getString(KEY_TOKEN, "");
 
-                String urlStr = BASE_URL + "/admin/hall_update.php?id=" + hallId;
+                String urlStr = API_HALL_UPDATE + hallId;
 
                 URL url = new URL(urlStr);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Authorization", "Bearer " + token);
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(Config.CONNECT_TIMEOUT);
+                conn.setReadTimeout(Config.READ_TIMEOUT);
                 conn.setDoOutput(true);
 
                 JSONObject json = new JSONObject();
@@ -640,24 +630,24 @@ public class HallsActivity extends BaseActivity {
 
                 runOnUiThread(() -> {
                     if (responseCode == 200) {
-                        Toast.makeText(this, "Зал обновлен", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.admin_msg_hall_updated, Toast.LENGTH_SHORT).show();
                         loadHalls();
                     } else {
                         try {
                             String cleanResponse = cleanJson(response);
                             JSONObject errorJson = new JSONObject(cleanResponse);
                             String message = errorJson.optString("error",
-                                    errorJson.optString("message", "Ошибка " + responseCode));
+                                    errorJson.optString("message", getString(R.string.common_error) + " " + responseCode));
                             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                         } catch (Exception e) {
-                            Toast.makeText(this, "Ошибка: " + response, Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, getString(R.string.common_error) + ": " + response, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
 
             } catch (Exception e) {
                 runOnUiThread(() ->
-                        Toast.makeText(this, "Ошибка сети: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                        Toast.makeText(this, getString(R.string.auth_msg_network_error) + ": " + e.getMessage(), Toast.LENGTH_LONG).show());
                 Log.e(TAG, "Update error", e);
             }
         }).start();
@@ -666,17 +656,17 @@ public class HallsActivity extends BaseActivity {
     private void deleteHall(int hallId) {
         new Thread(() -> {
             try {
-                String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                        .getString("jwt_token", "");
+                String token = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+                        .getString(KEY_TOKEN, "");
 
-                String urlStr = BASE_URL + "/admin/hall_delete.php?id=" + hallId;
+                String urlStr = API_HALL_DELETE + hallId;
 
                 URL url = new URL(urlStr);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("DELETE");
                 conn.setRequestProperty("Authorization", "Bearer " + token);
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(Config.CONNECT_TIMEOUT);
+                conn.setReadTimeout(Config.READ_TIMEOUT);
 
                 int responseCode = conn.getResponseCode();
                 BufferedReader reader = (responseCode >= 200 && responseCode < 300) ?
@@ -693,24 +683,24 @@ public class HallsActivity extends BaseActivity {
 
                 runOnUiThread(() -> {
                     if (finalCode == 200) {
-                        Toast.makeText(this, "Зал удален", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.admin_msg_hall_deleted, Toast.LENGTH_SHORT).show();
                         loadHalls();
                     } else {
                         try {
                             String cleanResponse = cleanJson(response);
                             JSONObject errorJson = new JSONObject(cleanResponse);
                             String message = errorJson.optString("error",
-                                    errorJson.optString("message", "Ошибка"));
+                                    errorJson.optString("message", getString(R.string.common_error)));
                             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
-                            Toast.makeText(this, "Ошибка: " + finalCode, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, getString(R.string.common_error) + ": " + finalCode, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
 
             } catch (Exception e) {
                 runOnUiThread(() ->
-                        Toast.makeText(this, "Ошибка сети: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                        Toast.makeText(this, getString(R.string.auth_msg_network_error) + ": " + e.getMessage(), Toast.LENGTH_LONG).show());
                 Log.e(TAG, "Delete error", e);
             }
         }).start();
@@ -719,18 +709,18 @@ public class HallsActivity extends BaseActivity {
     private void deletePhoto(int hallId, int photoId, LinearLayout photoContainer, int currentCapacity, JSONArray currentBathTypes) {
         new Thread(() -> {
             try {
-                String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                        .getString("jwt_token", "");
+                String token = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+                        .getString(KEY_TOKEN, "");
 
-                String urlStr = BASE_URL + "/admin/hall_update.php?id=" + hallId;
+                String urlStr = API_HALL_UPDATE + hallId;
 
                 URL url = new URL(urlStr);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Authorization", "Bearer " + token);
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(Config.CONNECT_TIMEOUT);
+                conn.setReadTimeout(Config.READ_TIMEOUT);
                 conn.setDoOutput(true);
 
                 JSONObject json = new JSONObject();
@@ -766,23 +756,23 @@ public class HallsActivity extends BaseActivity {
                             LinearLayout parent = (LinearLayout) photoContainer.getParent();
                             parent.removeView(photoContainer);
                         }
-                        Toast.makeText(this, "Фото удалено", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.admin_msg_photo_deleted, Toast.LENGTH_SHORT).show();
                     } else {
                         try {
                             String cleanResponse = cleanJson(response);
                             JSONObject errorJson = new JSONObject(cleanResponse);
                             String message = errorJson.optString("error",
-                                    errorJson.optString("message", "Ошибка"));
+                                    errorJson.optString("message", getString(R.string.common_error)));
                             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                         } catch (Exception e) {
-                            Toast.makeText(this, "Ошибка: " + finalCode, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, getString(R.string.common_error) + ": " + finalCode, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
 
             } catch (Exception e) {
                 runOnUiThread(() ->
-                        Toast.makeText(this, "Ошибка сети: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                        Toast.makeText(this, getString(R.string.auth_msg_network_error) + ": " + e.getMessage(), Toast.LENGTH_LONG).show());
                 Log.e(TAG, "Delete photo error", e);
             }
         }).start();
@@ -791,10 +781,10 @@ public class HallsActivity extends BaseActivity {
     private void uploadPhoto(int hallId, Uri photoUri, int currentCapacity, JSONArray currentBathTypes) {
         new Thread(() -> {
             try {
-                String token = getSharedPreferences("auth_prefs", MODE_PRIVATE)
-                        .getString("jwt_token", "");
+                String token = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+                        .getString(KEY_TOKEN, "");
 
-                String urlStr = BASE_URL + "/admin/hall_update.php?id=" + hallId;
+                String urlStr = API_HALL_UPDATE + hallId;
                 URL url = new URL(urlStr);
 
                 String boundary = "----" + System.currentTimeMillis();
@@ -803,8 +793,8 @@ public class HallsActivity extends BaseActivity {
                 conn.setRequestProperty("Authorization", "Bearer " + token);
                 conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
                 conn.setDoOutput(true);
-                conn.setConnectTimeout(15000);
-                conn.setReadTimeout(15000);
+                conn.setConnectTimeout(Config.UPLOAD_TIMEOUT);
+                conn.setReadTimeout(Config.UPLOAD_TIMEOUT);
 
                 DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
 
@@ -821,7 +811,7 @@ public class HallsActivity extends BaseActivity {
                 int bytesRead;
                 InputStream inputStream = getContentResolver().openInputStream(photoUri);
                 if (inputStream == null) {
-                    throw new Exception("Не удалось открыть файл");
+                    throw new Exception(getString(R.string.common_error));
                 }
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     dos.write(buffer, 0, bytesRead);
@@ -847,28 +837,26 @@ public class HallsActivity extends BaseActivity {
 
                 runOnUiThread(() -> {
                     if (responseCode == 200) {
-                        Toast.makeText(this, "Фото загружено", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.admin_msg_photo_uploaded, Toast.LENGTH_SHORT).show();
                         loadHalls();
                     } else {
                         try {
                             String clean = cleanJson(response);
                             JSONObject err = new JSONObject(clean);
-                            String msg = err.optString("error", err.optString("message", "Ошибка " + responseCode));
+                            String msg = err.optString("error", err.optString("message", getString(R.string.common_error) + " " + responseCode));
                             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
                         } catch (Exception e) {
-                            Toast.makeText(this, "Ошибка: " + response, Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, getString(R.string.common_error) + ": " + response, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
 
             } catch (Exception e) {
                 runOnUiThread(() ->
-                        Toast.makeText(this, "Ошибка: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                        Toast.makeText(this, getString(R.string.common_error) + ": " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
         }).start();
     }
-
-
 
     private void writeFieldUTF8(DataOutputStream dos, String boundary, String name, String value) throws Exception {
         String lineFeed = "\r\n";
@@ -890,8 +878,8 @@ public class HallsActivity extends BaseActivity {
             try {
                 HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
                 conn.setDoInput(true);
-                conn.setConnectTimeout(10000);
-                conn.setReadTimeout(10000);
+                conn.setConnectTimeout(Config.CONNECT_TIMEOUT);
+                conn.setReadTimeout(Config.READ_TIMEOUT);
                 conn.connect();
 
                 if (conn.getResponseCode() == 200) {

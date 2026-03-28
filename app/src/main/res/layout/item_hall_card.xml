@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardRoot"
     android:layout_width="match_parent"
@@ -40,7 +41,7 @@
             android:id="@+id/tvDescLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Описание:"
+            android:text="@string/admin_label_description"
             android:textSize="14sp"
             android:textStyle="bold"
             android:paddingTop="8dp"
@@ -67,7 +68,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Фотографии зала:"
+            android:text="@string/admin_label_photos"
             android:textSize="14sp"
             android:textStyle="bold"
             android:paddingTop="8dp"
@@ -99,7 +100,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Действия:"
+            android:text="@string/admin_label_actions"
             android:textSize="14sp"
             android:textStyle="bold"
             android:paddingBottom="12dp" />
@@ -115,7 +116,7 @@
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Изменить зал"
+                android:text="@string/admin_btn_edit"
                 android:textSize="14sp"
                 android:textColor="#FFFFFF"
                 android:background="@drawable/button_orange"
@@ -128,13 +129,12 @@
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Удалить"
+                android:text="@string/admin_btn_delete"
                 android:textSize="14sp"
                 android:textColor="#1E1E1E"
                 android:background="@drawable/button_outline"
                 android:backgroundTint="@null"
                 android:padding="8dp" />
         </LinearLayout>
-
     </LinearLayout>
 </androidx.cardview.widget.CardView>
