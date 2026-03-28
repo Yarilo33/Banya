@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,6 +52,53 @@ public class AuthActivity extends AppCompatActivity {
 
         tvBack.setOnClickListener(v -> finish());
 
+        // Добавляем "+" автоматически при фокусе на поле телефона
+        etPhone.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                String currentText = etPhone.getText().toString().trim();
+                if (!currentText.startsWith("+")) {
+                    etPhone.setText("+");
+                    etPhone.setSelection(etPhone.getText().length());
+                }
+            }
+        });
+
+        // Следим за изменениями текста - если удалили "+", добавляем обратно
+        etPhone.addTextChangedListener(new TextWatcher() {
+            private boolean isEditing = false;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (isEditing) return;
+
+                isEditing = true;
+                String text = s.toString();
+
+                // Если поле пустое, добавляем "+"
+                if (text.isEmpty()) {
+                    etPhone.setText("+");
+                    etPhone.setSelection(1);
+                }
+                // Если текст не начинается с "+", добавляем его
+                else if (!text.startsWith("+")) {
+                    etPhone.setText("+" + text);
+                    etPhone.setSelection(etPhone.getText().length());
+                }
+
+                isEditing = false;
+            }
+        });
+
+        // Инициализируем поле с "+"
+        etPhone.setText("+");
+        etPhone.setSelection(1);
+
         // Кнопка "Регистрация" и переход на RegistrationActivity
         btnRegister.setOnClickListener(v -> {
             Intent intent = new Intent(AuthActivity.this, RegistrationActivity.class);
@@ -61,7 +110,7 @@ public class AuthActivity extends AppCompatActivity {
             String phone = etPhone.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            if (phone.isEmpty() || password.isEmpty()) {
+            if (phone.isEmpty() || phone.equals("+") || password.isEmpty()) {
                 Toast.makeText(this, R.string.auth_msg_fill_fields, Toast.LENGTH_SHORT).show();
                 return;
             }
