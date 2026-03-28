@@ -35,14 +35,14 @@ import java.util.Set;
 
 public class HallDetailActivity extends AppCompatActivity {
 
-    // ✅ Используем константы из Config
+    // Используем константы из Config
     private static final String API_HALL_DETAIL = Config.API_HALL_DETAIL;
-    private static final String BASE_PHOTO_URL = Config.API_BASE;
+    private static final String PHOTO_BASE_URL = Config.API_BASE;
     private static final String API_BOOKING_CREATE = Config.API_BOOKING_CREATE;
     private static final String PREF_NAME = Config.PREF_NAME;
     private static final String KEY_TOKEN = Config.PREF_KEY_TOKEN;
 
-    private TextView tvName, tvPrice, tvDescription, tvPhotoCounter;
+    private TextView tvName, tvPrice, tvDescription, tvPhotoCounter, tvCapacity;
     private TextView tvMonthYear, tvSelectedDate, tvSelectedTime, tvTotalPrice;
     private LinearLayout typesContainer, dotsContainer, weekdaysContainer;
     private LinearLayout calendarCard, timeSelectionCard;
@@ -89,6 +89,7 @@ public class HallDetailActivity extends AppCompatActivity {
     private void initViews() {
         tvName = findViewById(R.id.tvName);
         tvPrice = findViewById(R.id.tvPrice);
+        tvCapacity = findViewById(R.id.tvCapacity);
         tvDescription = findViewById(R.id.tvDescription);
         tvPhotoCounter = findViewById(R.id.tvPhotoCounter);
         tvMonthYear = findViewById(R.id.tvMonthYear);
@@ -155,7 +156,7 @@ public class HallDetailActivity extends AppCompatActivity {
 
     private void initWeekdays() {
         weekdaysContainer.removeAllViews();
-        // ✅ Получаем дни недели из resources
+        // Получаем дни недели из resources
         String[] weekdays = getResources().getStringArray(R.array.weekdays);
         for (String day : weekdays) {
             TextView tv = new TextView(this);
@@ -171,7 +172,7 @@ public class HallDetailActivity extends AppCompatActivity {
     }
 
     private void updateCalendar() {
-        // ✅ Получаем месяцы из resources
+        // Получаем месяцы из resources
         String[] months = getResources().getStringArray(R.array.months);
 
         int month = currentCalendar.get(Calendar.MONTH);
@@ -632,7 +633,7 @@ public class HallDetailActivity extends AppCompatActivity {
         try {
             JSONObject json = new JSONObject(cleanJson(response));
             if (!json.optBoolean("success", false)) {
-                Toast.makeText(this, json.optString("message", getString(R.string.common_error)), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, json.optString("message", "Ошибка"), Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
@@ -640,11 +641,24 @@ public class HallDetailActivity extends AppCompatActivity {
             JSONObject hall = json.optJSONObject("hall");
             if (hall == null) return;
 
-            tvName.setText(hall.optString("name", getString(R.string.detail_label_no_name)));
+            // Название и цена
+            tvName.setText(hall.optString("name", "Без названия"));
             hourlyPrice = hall.optInt("price_hourly", 0);
-            tvPrice.setText(hourlyPrice + " " + getString(R.string.detail_unit_price));
-            tvDescription.setText(hall.optString("description", getString(R.string.detail_label_no_description)));
+            tvPrice.setText(hourlyPrice + " ₽/час");
 
+            // Вместимость
+            int capacity = hall.optInt("capacity", 0);
+            if (capacity > 0) {
+                tvCapacity.setText(String.valueOf(capacity));
+                tvCapacity.setVisibility(View.VISIBLE);
+            } else {
+                tvCapacity.setVisibility(View.GONE);
+            }
+
+            // Описание
+            tvDescription.setText(hall.optString("description", "Описание отсутствует"));
+
+            // Типы бань (чипсы)
             JSONArray types = hall.optJSONArray("types");
             typesContainer.removeAllViews();
             if (types != null) {
@@ -656,6 +670,7 @@ public class HallDetailActivity extends AppCompatActivity {
                 }
             }
 
+            // Фотографии
             JSONArray photos = hall.optJSONArray("photos");
             photoUrls.clear();
 
@@ -665,7 +680,7 @@ public class HallDetailActivity extends AppCompatActivity {
                     if (photo != null) {
                         String url = photo.optString("url", "");
                         if (!url.isEmpty()) {
-                            String fullUrl = url.startsWith("http") ? url : BASE_PHOTO_URL + url;
+                            String fullUrl = url.startsWith("http") ? url : PHOTO_BASE_URL + url;
                             photoUrls.add(fullUrl);
                         }
                     }
@@ -681,7 +696,7 @@ public class HallDetailActivity extends AppCompatActivity {
             createDots(photoUrls.size());
 
         } catch (Exception e) {
-            Toast.makeText(this, getString(R.string.common_error) + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ошибка parsing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
